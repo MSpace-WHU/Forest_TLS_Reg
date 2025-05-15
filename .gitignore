@@ -1,0 +1,8 @@
+# 忽略VSCode设置
+.vscode/
+
+# 忽略所有 build 输出
+build/
+
+# 忽略data文件
+data/

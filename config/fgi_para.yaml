@@ -1,0 +1,43 @@
+%YAML:1.0
+# point to img
+imgRow: 3600
+imgCol: 1500
+
+# find the point with minmum height
+range: 100
+grid_num: 100
+
+# segment by continuity
+isRow_Or_Column: 1 # 0,1,2
+dDif_Th: 0.05
+nSch_Stp: 10
+lGrp_Ele_Min: 15
+
+# for FEC cluster
+min_component_size: 200
+tolorance: 0.2
+max_n: 50
+merge_dist: 0.1
+
+# to distinguish the cluster type
+linearityThres: 0.95
+scateringThres: 0.05
+upThres: 0.3
+clusterHeight: 5
+centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
+
+# for tri descriptor
+descriptor_near_num: 10
+descriptor_min_len: 2
+descriptor_max_len: 50
+side_resolution: 0.1
+
+# for the registration
+candidate_num: 50
+rough_dis_threshold: 0.03
+vertex_diff_threshold: 0
+icp_threshold: 0.3
+dist_candi_frames_verify: 1
+normal_geo_verify: 1
+dis_geo_verify: 0.3
+use_matched_num: 4000

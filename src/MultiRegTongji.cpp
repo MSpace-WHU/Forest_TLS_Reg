@@ -58,7 +58,7 @@ int main(int argc, char **argv)
         std::cout << "USAGE: ./MultiRegTongji [Plot NUM]" << std::endl;
         return 1;
     }
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
+    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
@@ -66,9 +66,8 @@ int main(int argc, char **argv)
     // std::cout << "here is good-1!" << std::endl; // debug
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> effectivenessData;
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> robustnessData;
-    // 使用 aligned_allocator 来确保 Eigen::Matrix4d 的对齐
-    std::vector<std::tuple<int, int, Eigen::Matrix4d>, Eigen::aligned_allocator<std::tuple<int, int, Eigen::Matrix4d>>> transformations;
-    // std::vector<std::tuple<int, int, Eigen::Matrix4d>> transformations;
+    // read ground truth of transformation
+    std::vector<std::tuple<int, int, Eigen::Matrix4d>> transformations;
     readTongjiTrans(data_path+"/data/tj/GroundTruthMatrices-Plot"+argv[1]+".txt", 
                     effectivenessData, robustnessData, transformations);
     std::cout << "effectivenessData: " << effectivenessData.size() << ", robustnessData: " << robustnessData.size() 
@@ -109,8 +108,6 @@ int main(int argc, char **argv)
     gen_dt = gen_dt/StationNUM;
     add_dt = add_dt/StationNUM;
     std::cout << BOLDBLUE << "Average GenTriDescs_t: " << gen_dt << " Average AddTriDescs_t: " << add_dt << RESET << std::endl;
-
-
 
     /************for display, the range image, stem and its position*************/
     // range images
@@ -249,7 +246,7 @@ int main(int argc, char **argv)
     // // AbsByDFS(0, initNode, candidates_vec, tlsVec, visited);
     
     //  calculated the ground truth of each TLS station
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans;
+    std::vector<Eigen::Affine3d> tlsTrans;
     for(int i=0; i<StationNUM; i++)
     {
         Eigen::Affine3d currPos;

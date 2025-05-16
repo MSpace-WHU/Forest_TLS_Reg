@@ -346,10 +346,11 @@ std::vector<std::string> split(std::string str,std::string s)
     }
     return vec;
 }
+
 // read the trans file from LeiCa RTC360
-std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> readTLSTrans(const std::string tansFile)
+std::vector<Eigen::Affine3d> readTLSTrans(const std::string tansFile)
 {
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> trans_matrix;
+    std::vector<Eigen::Affine3d> trans_matrix;
     std::ifstream open_file(tansFile);
     static int num = 0;
     if(open_file){
@@ -427,8 +428,9 @@ std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> readTLST
 void readTongjiTrans(const std::string& filename, 
                      std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>>& effectivenessData,
                      std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>>& robustnessData,
-                     std::vector<std::tuple<int, int, Eigen::Matrix4d>, Eigen::aligned_allocator<std::tuple<int, int, Eigen::Matrix4d>>>& transformations) {
-    std::ifstream file(filename);
+                     std::vector<std::tuple<int, int, Eigen::Matrix4d>>& transformations)
+{
+	std::ifstream file(filename);
     std::string line;
     std::string currentSection;
 
@@ -465,7 +467,6 @@ void readTongjiTrans(const std::string& filename,
         }
 
         // 读取4x4变换矩阵
-		// Eigen::aligned_allocator<Eigen::Matrix4d> transformation;
         Eigen::Matrix4d transformation;
         for (int i = 0; i < 4; ++i) {
             if (!std::getline(file, line)) {
@@ -800,8 +801,7 @@ void write_error(std::string filePath, std::pair<Eigen::Vector3d, Eigen::Vector3
 }
 
 // calculate the accuracy vector
-void accur_evaluation_vec(std::vector<TLSPos> esti, std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> truh, 
-                            std::vector<PosError> &errors)
+void accur_evaluation_vec(std::vector<TLSPos> esti, std::vector<Eigen::Affine3d> truh, std::vector<PosError> &errors)
 {
 	std::pair<Eigen::Vector3d, Eigen::Vector3d> err;
 	int ID;
@@ -826,6 +826,7 @@ void accur_evaluation_vec(std::vector<TLSPos> esti, std::vector<Eigen::Affine3d,
 		errors.push_back(pe);
 	}
 }
+
 // write the result vector
 void write_error_vec(std::string filePath, std::vector<PosError> &errors)
 {

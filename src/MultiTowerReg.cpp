@@ -45,7 +45,7 @@ using namespace Eigen;
 
 int main(int argc, char **argv) 
 {
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
+    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     std::cout << BOLDGREEN << "--------------------Reading Parameters-------------------" << RESET << std::endl;
     // read the setting parameters

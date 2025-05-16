@@ -1350,7 +1350,7 @@ void GTINDescManager::candidate_frames_selector(const FrameInfo &curr_frame,
     //           << ", dis_match_cnt: " << dis_match_cnt << std::endl;
     
     // record match index
-    std::vector<Eigen::Vector2i, Eigen::aligned_allocator<Eigen::Vector2i>> index_recorder;
+    std::vector<Eigen::Vector2i> index_recorder;
     for (size_t i = 0; i < useful_match.size(); i++) 
     {
         if (useful_match[i]) 

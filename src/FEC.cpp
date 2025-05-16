@@ -17,7 +17,7 @@ std::vector<pcl::PointIndices> FEC(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, in
         PCL_ERROR("Could not find any cluster");
     }
     // KD treee, and the input data
-    pcl::KdTreeFLANN<pcl::PointXYZ>cloud_kdtreeflann;
+    pcl::KdTreeFLANN<pcl::PointXYZ> cloud_kdtreeflann;
     cloud_kdtreeflann.setInputCloud(cloud);
     // the marked records
     int cloud_size = cloud->size();

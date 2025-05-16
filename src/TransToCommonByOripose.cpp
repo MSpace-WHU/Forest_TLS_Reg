@@ -28,8 +28,8 @@ int main(int argc, char **argv)
     // /media/xiaochen/xch_disk/RegTLSData/ETH-Trees/
     std::string data_path = "/media/xiaochen/xch_disk/RegTLSData/SNJ_Data/snj-040/downsampled/";
 
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans
-                                     = readTLSTrans(data_path+"transformation.txt");
+    std::vector<Eigen::Affine3d> tlsTrans;
+    tlsTrans = readTLSTrans(data_path+"transformation.txt");
 
     std::cout << "tlsTrans.size(): "<< tlsTrans.size() << std::endl;
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_data(new pcl::PointCloud<pcl::PointXYZ>);

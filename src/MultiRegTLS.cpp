@@ -50,14 +50,14 @@ using namespace gtsam;
 
 int main(int argc, char **argv) 
 {
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
+    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
     ReadParas(data_path+"/config/snj_para.yaml", config_setting);   //snj_para.yaml yixuebu_para.yaml
     // std::cout << "Here is good-1 " << std::endl; 
     // read the grund truth of pose data
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
+    std::vector<Eigen::Affine3d> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
     std::cout << "tlsTrans size(): "<< tlsTrans.size() << std::endl;
     // read TLS data
     pcl::PointCloud<pcl::PointXYZ>::Ptr tls_point_data(new pcl::PointCloud<pcl::PointXYZ>);

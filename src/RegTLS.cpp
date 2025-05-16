@@ -44,14 +44,17 @@ using namespace Eigen;
 
 int main(int argc, char **argv) 
 {
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
+    std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     std::cout << BOLDGREEN << "--------------------Reading-------------------" << RESET << std::endl;
+    std::cout << BOLDGREEN << data_path+"/config/snj_para.yaml" << RESET << std::endl;
+    std::cout << BOLDGREEN << data_path+"/config/snj_para.yaml" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
-    ReadParas(data_path+"/config/snj_para.yaml", config_setting);    
+    ReadParas(data_path+"/config/snj_para.yaml", config_setting);
+
     // read the grund truth of pose data
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
+    std::vector<Eigen::Affine3d> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
     Eigen::Affine3d gt_pose = tlsTrans[std::atoi(argv[1])-1].inverse() * tlsTrans[std::atoi(argv[2])-1];
     std::cout << "tlsTrans.size(): "<< tlsTrans.size() << std::endl;
     // read TLS data
@@ -123,8 +126,7 @@ int main(int argc, char **argv)
         // fine registration by GICP
         auto t_update_gicp_begin = std::chrono::high_resolution_clock::now();
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> refine_transform_gicp;
-        // std::cout << "Here is good!" << std::endl;
-        // fast_gicp_registration(source_data, target_data, refine_transform_gicp);
+
         small_gicp_registration(source_data, target_data, refine_transform_gicp);
         // pcl_gicp_registration(source_data, target_data, refine_transform_gicp);
         auto t_update_gicp_end = std::chrono::high_resolution_clock::now();

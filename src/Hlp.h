@@ -65,14 +65,18 @@ void ReadParas(const std::string& file_path, ConfigSetting &config_setting);
 
 // split the line into string
 std::vector<std::string> split(std::string str,std::string s);
+
 // read the trans file from LeiCa RTC360
-std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> readTLSTrans(const std::string tansFile);
+std::vector<Eigen::Affine3d> readTLSTrans(const std::string tansFile);
+
 // read the trans file of Tongji Trees dataset
 void readTongjiTrans(const std::string& filename, 
                      std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>>& effectivenessData,
                      std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>>& robustnessData,
-                     std::vector<std::tuple<int, int, Eigen::Matrix4d>, Eigen::aligned_allocator<std::tuple<int, int, Eigen::Matrix4d>>>& transformations);
+                     std::vector<std::tuple<int, int, Eigen::Matrix4d>>& transformations);
 
+
+// read transformation from FGI data
 void readFGITrans(const std::string filename, std::pair<Eigen::Vector3d, Eigen::Matrix3d>& trans);
 
 // read and write the las data, stored by pointXYZ
@@ -94,9 +98,10 @@ void down_sampling_voxel(pcl::PointCloud<pcl::PointXYZ> &pl_feat,
 void accur_evaluation(std::pair<Eigen::Vector3d, Eigen::Matrix3d> esti, Eigen::Affine3d truth,
 					 std::pair<Eigen::Vector3d, Eigen::Vector3d> &errors);
 void write_error(std::string filePath, std::pair<Eigen::Vector3d, Eigen::Vector3d> &errors);
+
 // accuracy evalution and write, for poses vector
-void accur_evaluation_vec(std::vector<TLSPos> esti, std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> truh, 
-                            std::vector<PosError> &errors);
+void accur_evaluation_vec(std::vector<TLSPos> esti, std::vector<Eigen::Affine3d> truh, std::vector<PosError> &errors);
+
 void write_error_vec(std::string filePath, std::vector<PosError> &errors);
 
 // write the pose data

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
+    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
     // // AbsByDFS(0, initNode, candidates_vec, tlsVec, visited);
 
     //  calculated the ground truth of each TLS station
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans;
+    std::vector<Eigen::Affine3d> tlsTrans;
     for(int i=0; i<StationNUM; i++)
     {
         Eigen::Affine3d currPos;

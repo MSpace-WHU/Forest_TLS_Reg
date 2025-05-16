@@ -20,8 +20,8 @@ using namespace Eigen;
 
 int main(int argc, char **argv) 
 {
-    std::string data_path = "/home/xiaochen/workspace/RegTLSPoints";
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
+    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
+    std::vector<Eigen::Affine3d> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
     std::cout << "tlsTrans.size(): "<< tlsTrans.size() << std::endl;
     for(int i=0; i<tlsTrans.size(); i++)
     {

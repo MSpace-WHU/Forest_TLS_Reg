@@ -21,7 +21,7 @@ using namespace pcl;
 using namespace Eigen;
 
 
-std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> readStationData(const std::string& filename) {
+std::vector<Eigen::Affine3d> readStationData(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;
@@ -29,7 +29,7 @@ std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> readStat
     }
 
     std::string line;
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> transforms;
+    std::vector<Eigen::Affine3d> transforms;
 
     while (std::getline(file, line)) {
         if (line.find("Station:") != std::string::npos) {
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
     // std::cout << "datapath: " << data_path+"/finalPoses.txt"<< std::endl;
     
     // change the data path of pose file
-    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> tlsTrans = readStationData(data_path+"findMinum-0-huber-kernal-score0.4/icpPoses.txt");
+    std::vector<Eigen::Affine3d> tlsTrans = readStationData(data_path+"findMinum-0-huber-kernal-score0.4/icpPoses.txt");
     
     std::cout << "tlsTrans.size(): "<< tlsTrans.size() << std::endl;
     std::ofstream outfile(data_path+"/transed/scan_positions.txt");

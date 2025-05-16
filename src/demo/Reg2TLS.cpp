@@ -55,21 +55,16 @@ int main(int argc, char **argv)
     // read the grund truth of pose data
     std::vector<Eigen::Affine3d> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
     Eigen::Affine3d gt_pose = tlsTrans[std::atoi(argv[1])-1].inverse() * tlsTrans[std::atoi(argv[2])-1];
-    std::cout << "tlsTrans.size(): "<< tlsTrans.size() << std::endl;
+    std::cout << BOLDGREEN << "----------------Read Points Data----------------" << RESET << std::endl;
+    std::cout << tlsTrans.size() << " TLS stations in this plot." << std::endl;
     // read TLS data
     pcl::PointCloud<pcl::PointXYZ>::Ptr target_data(new pcl::PointCloud<pcl::PointXYZ>);
     readTLSData(data_path+"/data/snj/"+ argv[1]+".las", target_data);
     pcl::PointCloud<pcl::PointXYZ>::Ptr source_data(new pcl::PointCloud<pcl::PointXYZ>);
     readTLSData(data_path+"/data/snj/"+ argv[2]+".las", source_data);
-
     std::cout << "Read Target Points NUM: " << target_data->size() << std::endl;
     std::cout << "Read Source Points NUM: " << source_data->size() << std::endl;
     
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr out_data(new pcl::PointCloud<pcl::PointXYZ>);
-    // pcl::transformPointCloud(*source_data, *out_data, gt_pose.matrix());
-    // std::string las_file = data_path + "/data/snj/" + argv[2] + "-transed.las";
-    // writeLas(las_file, out_data);
-
     std::cout << BOLDGREEN << "----------------Generate Descriptor----------------" << RESET << std::endl;
     GTINDescManager *GTIN_map = new GTINDescManager(config_setting);
     // generate the tri descriptor and save (Target)
@@ -113,9 +108,9 @@ int main(int argc, char **argv)
         write_error(data_path+"/data/snj/"+ argv[2]+"-rough-error.txt", rough_error);
         
         // trans the source data, and save (rough trans data)
-        // down_sampling_voxel(*source_data, 0.03);
         trans_point_cloud(loop_transform, source_data);
-        writeLas(data_path+"/data/snj/"+ argv[2]+"-rough_trans.las", source_data);
+        // writeLas(data_path+"/data/snj/"+ argv[2]+"-rough_trans.las", source_data);
+        
         // trans obj points, and save (rough trans data)
         trans_point_cloud(loop_transform, searchMap.currPoints);
         // writeLas(data_path+"/data/snj/"+ argv[2]+"-obj-transed.las", searchMap.currPoints);
@@ -129,7 +124,7 @@ int main(int argc, char **argv)
         small_gicp_registration(source_data, target_data, refine_transform_gicp);
         // pcl_gicp_registration(source_data, target_data, refine_transform_gicp);
         auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
-        std::cout << "[Time] FastGICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
+        std::cout << "[Time] Small_GICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
 
         // finely trans the source data, and save
         trans_point_cloud(refine_transform_gicp, source_data);
@@ -148,4 +143,4 @@ int main(int argc, char **argv)
 
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
     return 0;
-}
+    }

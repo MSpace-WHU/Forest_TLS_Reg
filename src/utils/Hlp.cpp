@@ -352,6 +352,13 @@ std::vector<Eigen::Affine3d> readTLSTrans(const std::string tansFile)
 {
     std::vector<Eigen::Affine3d> trans_matrix;
     std::ifstream open_file(tansFile);
+	if (!open_file.is_open()) 
+	{
+		// Error, and exit
+    	std::cerr << "Error: Failed to open file: " << tansFile << std::endl;
+    	return trans_matrix;
+	}
+
     static int num = 0;
     if(open_file){
 		std::string line;
@@ -637,7 +644,7 @@ void writeLas(std::string las_file, pcl::PointCloud<pcl::PointXYZ>::Ptr point_cl
 	writer.WriteHeader();
 	ofs.close();
 
-    std::cout << "write " << las_file << " finish!" << "\nsize: " << point_cloud->size() << std::endl;
+    std::cout << "write " << las_file << " (size: " << point_cloud->size() << " points) finish!" << std::endl;
 }
 
 // transfromation type

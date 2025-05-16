@@ -116,7 +116,7 @@ int main(int argc, char **argv)
         small_gicp_registration(source_data, target_data, refine_transform_gicp);
         // pcl_gicp_registration(source_data, target_data, refine_transform_gicp);
         auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
-        std::cout << "[Time] FastGICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
+        std::cout << "[Time] Small_GICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
 
         // finely trans the source data, and save
         trans_point_cloud(refine_transform_gicp, source_data);

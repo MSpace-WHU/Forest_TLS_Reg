@@ -120,7 +120,7 @@ int main(int argc, char **argv)
             // fast_gicp_registration(source_data, target_data, refine_transform_gicp);
             small_gicp_registration(ICP_source, ICP_target, refine_transform_gicp);
             auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
-            std::cout << "[Time] FastGICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
+            std::cout << "[Time] Small_GICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
             
             trans_point_cloud(refine_transform_gicp, ICP_source);
             // writeLas(data_path+"/data/tower/"+ std::to_string(i+1) +"-fine_trans.las", ICP_source);

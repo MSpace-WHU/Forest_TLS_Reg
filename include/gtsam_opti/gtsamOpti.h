@@ -1,6 +1,6 @@
 #ifndef _DST_H_Included_
 #define _DST_H_Included_
-#include "DST.h"
+#include "../include/dst/DST.h"
 #endif
 
 // GTSAM

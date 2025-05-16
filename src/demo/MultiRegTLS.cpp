@@ -2,44 +2,43 @@
 
 #ifndef _HLP_H_Included_
 #define _HLP_H_Included_
-#include "Hlp.h"
+#include "../include/utils/Hlp.h"
 #endif
 
 #ifndef _DST_H_Included_
 #define _DST_H_Included_
-#include "DST.h"
+#include "../include/dst/DST.h"
 #endif
 
 #ifndef _GTSAMOPTI_H_Included_
 #define _GTSAMOPTI_H_Included_
-#include "gtsamOpti.h"
+#include "../include/gtsam_opti/gtsamOpti.h"
 #endif
 
 #ifndef _GENALG_H_Included_
 #define _GENALG_H_Included_
-#include "GenAlg.h"
+#include "../include/utils/GenAlg.h"
 #endif
 
 #ifndef _POINT2IMG_H_Included_
 #define _POINT2IMG_H_Included_
-#include "Point2img.h"
+#include "../include/utils/Point2img.h"
 #endif
 
 #ifndef _FEC_H_Included_
 #define _FEC_H_Included_
-#include "FEC.h"
+#include "../include/utils/FEC.h"
 #endif
 
 #ifndef _TriObj_H_Included_
 #define _TriObj_H_Included_
-#include "TriObj.h"
+#include "../include/utils/TriObj.h"
 #endif
 
 // C++
 #include <iostream>
 // pcl
-// #include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
+#include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -49,44 +48,30 @@ using namespace pcl;
 using namespace Eigen;
 using namespace gtsam;
 
-
 int main(int argc, char **argv) 
 {
-    // check the num of parameters
-    if (argc < 2) {
-        std::cout << "Error, at least 1 parameter" << std::endl;
-        std::cout << "USAGE: ./MultiRegTongji [Plot NUM]" << std::endl;
-        return 1;
-    }
     std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
-    ReadParas(data_path+"/config/tj_para.yaml", config_setting);   
-    // std::cout << "here is good-1!" << std::endl; // debug
-    std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> effectivenessData;
-    std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> robustnessData;
-    // read ground truth of transformation
-    std::vector<std::tuple<int, int, Eigen::Matrix4d>> transformations;
-    readTongjiTrans(data_path+"/data/tj/GroundTruthMatrices-Plot"+argv[1]+".txt", 
-                    effectivenessData, robustnessData, transformations);
-    std::cout << "effectivenessData: " << effectivenessData.size() << ", robustnessData: " << robustnessData.size() 
-              << ", transformations: " << transformations.size() << std::endl;
-
+    ReadParas(data_path+"/config/snj_para.yaml", config_setting);   //snj_para.yaml yixuebu_para.yaml
+    // std::cout << "Here is good-1 " << std::endl; 
+    // read the grund truth of pose data
+    std::vector<Eigen::Affine3d> tlsTrans = readTLSTrans(data_path+"/data/snj/transformation.txt");
+    std::cout << "tlsTrans size(): "<< tlsTrans.size() << std::endl;
     // read TLS data
-    int StationNUM = effectivenessData.size() + 1;
     pcl::PointCloud<pcl::PointXYZ>::Ptr tls_point_data(new pcl::PointCloud<pcl::PointXYZ>);
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> fine_pose;
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> rough_error, fine_error;
     GTINDescManager *GTIN_map = new GTINDescManager(config_setting);
     std::vector<FrameInfo> frameInfoVec;
     double gen_dt = 0, add_dt = 0;
-    for(int i=1; i<=StationNUM; i++)
+    for(int i=1; i<=tlsTrans.size(); i++)
     {
         std::cout << BOLDGREEN << "--------------------Reading TLS Data-------------------" << RESET << std::endl;
         tls_point_data->clear();
-        pcl::io::loadPLYFile(data_path+"/data/tj/S"+std::to_string(i)+".ply", *tls_point_data);
-        std::cout << data_path+"/data/tj/S"+std::to_string(i)+".ply num:" << tls_point_data->size() << std::endl;
+        readTLSData(data_path+"/data/snj/"+ std::to_string(i) +".las", tls_point_data);    
+        std::cout << "Read Target (" + std::to_string(i) +"), Points NUM: " << tls_point_data->size() << std::endl;
 
         std::cout << BOLDGREEN << "----------------Generate Descriptor----------------" << RESET << std::endl;
         // generate the tri descriptor and save (Target)
@@ -99,96 +84,97 @@ int main(int argc, char **argv)
         
         gen_dt += time_inc(t_2, t_1);
         add_dt += time_inc(t_3, t_2);
-        frameInfoVec.push_back(currMap);
 
+        frameInfoVec.push_back(currMap);
+        
         std::cout << "FrameID: " << currMap.frame_id_
                 << " triangles NUM: " << currMap.desc_.size() 
-                << " feature points: "<< currMap.currCenter->points.size() << std::endl;
+                << " feature points: "<< currMap.currCenter->points.size() << std::endl;  
     }
-    gen_dt = gen_dt/StationNUM;
-    add_dt = add_dt/StationNUM;
+    gen_dt = gen_dt/tlsTrans.size();
+    add_dt = add_dt/tlsTrans.size();
     std::cout << BOLDBLUE << "Average GenTriDescs_t: " << gen_dt << " Average AddTriDescs_t: " << add_dt << RESET << std::endl;
-
-    /************for display, the range image, stem and its position*************/
-    // range images
-    std::cout << "range images NUM: " << GTIN_map->pointMat_vec_.size() << std::endl;
-    for(int i=0; i<GTIN_map->pointMat_vec_.size(); i++)
-    {
-        resizePixVal(GTIN_map->pointMat_vec_[i]); // resize the pixel value into [0-1]
-        cv::imwrite(data_path+"/data/tj/" + std::to_string(i) + "-ori_fig.png", GTIN_map->pointMat_vec_[i]); 
-
-        // save the filtered fig
-        for(int j=0; j<GTIN_map->pointMat_vec_[i].rows; j++)
-        {
-            for(int k=0; k<GTIN_map->pointMat_vec_[i].cols; k++)
-            {
-                if(GTIN_map->pointTypeMat_vec_[i].at<float>(j, k) != 1)
-                {
-                    GTIN_map->pointMat_vec_[i].at<float>(j, k) = 0;
-                }
-            }
-        }
-        cv::imwrite(data_path+"/data/tj/" + std::to_string(i) + "-filterd_fig.png", GTIN_map->pointMat_vec_[i]); 
-    }
-
-    // stem position and its points cloud
-    std::cout << "clusters_vec_ NUM: " << GTIN_map->clusters_vec_.size() << std::endl;
-    for(int i=0; i<GTIN_map->clusters_vec_.size(); i++)
-    {
-        pcl::PointCloud<pcl::PointXYZINormal>::Ptr stem_position(new pcl::PointCloud<pcl::PointXYZINormal>);
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
-        
-        for(int j=0; j<GTIN_map->clusters_vec_[i].size(); j++)
-        {
-            // get the stem position
-            pcl::PointXYZINormal p = GTIN_map->clusters_vec_[i][j].p_center_;    
-            stem_position->push_back(p);
-            
-            // get the stem points with different colors
-            pcl::PointXYZRGB pk;
-            double r = rand()/256; double g = rand()/256; double b = rand()/256;
-            for(int k=0; k<GTIN_map->clusters_vec_[i][j].points_.size(); k++)
-            {
-                pk.x = GTIN_map->clusters_vec_[i][j].points_[k].x;
-                pk.y = GTIN_map->clusters_vec_[i][j].points_[k].y;
-                pk.z = GTIN_map->clusters_vec_[i][j].points_[k].z;
-
-                pk.r = r; pk.g = g; pk.b = b;
-
-                objs->push_back(pk);
-            }
-        }
-        std::cout << "stem_position NUM: " << stem_position->size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/tj/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
-        pcl::io::savePCDFile(data_path+"/data/tj/" + std::to_string(i) + "-stems.pcd", *objs);
-    }
     
-    // discarded clusters
-    std::cout << "discarded clusters NUM: " << GTIN_map->discarded_clusters_vec.size() << std::endl;
-    for(int i=0; i<GTIN_map->discarded_clusters_vec.size(); i++)
-    {
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
-        for(int j=0; j<GTIN_map->discarded_clusters_vec[i].size(); j++)
-        {
-            // get the stem points with different colors
-            pcl::PointXYZRGB pk;
-            double r = rand()/256; double g = rand()/256; double b = rand()/256;
-            for(int k=0; k<GTIN_map->discarded_clusters_vec[i][j].points_.size(); k++)
-            {
-                pk.x = GTIN_map->discarded_clusters_vec[i][j].points_[k].x;
-                pk.y = GTIN_map->discarded_clusters_vec[i][j].points_[k].y;
-                pk.z = GTIN_map->discarded_clusters_vec[i][j].points_[k].z;
 
-                pk.r = r; pk.g = g; pk.b = b;
+    // /************for display, the range image, stem and its position*************/
+    // // range images
+    // std::cout << "range images NUM: " << GTIN_map->pointMat_vec_.size() << std::endl;
+    // for(int i=0; i<GTIN_map->pointMat_vec_.size(); i++)
+    // {
+    //     resizePixVal(GTIN_map->pointMat_vec_[i]); // resize the pixel value into [0-1]
+    //     cv::imwrite(data_path+"/data/snj/" + std::to_string(i) + "-ori_fig.png", GTIN_map->pointMat_vec_[i]); 
 
-                objs->push_back(pk);
-            }
-        }
-        std::cout << "current station discard_cluster NUM: " << GTIN_map->discarded_clusters_vec[i].size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/tj/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
-    }
-    /************for display the stem and its position*************/
+    //     // save the filtered fig
+    //     for(int j=0; j<GTIN_map->pointMat_vec_[i].rows; j++)
+    //     {
+    //         for(int k=0; k<GTIN_map->pointMat_vec_[i].cols; k++)
+    //         {
+    //             if(GTIN_map->pointTypeMat_vec_[i].at<float>(j, k) != 1)
+    //             {
+    //                 GTIN_map->pointMat_vec_[i].at<float>(j, k) = 0;
+    //             }
+    //         }
+    //     }
+    //     cv::imwrite(data_path+"/data/snj/" + std::to_string(i) + "-filterd_fig.png", GTIN_map->pointMat_vec_[i]); 
+    // }
 
+    // // stem position and its points cloud
+    // std::cout << "clusters_vec_ NUM: " << GTIN_map->clusters_vec_.size() << std::endl;
+    // for(int i=0; i<GTIN_map->clusters_vec_.size(); i++)
+    // {
+    //     pcl::PointCloud<pcl::PointXYZINormal>::Ptr stem_position(new pcl::PointCloud<pcl::PointXYZINormal>);
+    //     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
+        
+    //     for(int j=0; j<GTIN_map->clusters_vec_[i].size(); j++)
+    //     {
+    //         // get the stem position
+    //         pcl::PointXYZINormal p = GTIN_map->clusters_vec_[i][j].p_center_;    
+    //         stem_position->push_back(p);
+            
+    //         // get the stem points with different colors
+    //         pcl::PointXYZRGB pk;
+    //         double r = rand()/256; double g = rand()/256; double b = rand()/256;
+    //         for(int k=0; k<GTIN_map->clusters_vec_[i][j].points_.size(); k++)
+    //         {
+    //             pk.x = GTIN_map->clusters_vec_[i][j].points_[k].x;
+    //             pk.y = GTIN_map->clusters_vec_[i][j].points_[k].y;
+    //             pk.z = GTIN_map->clusters_vec_[i][j].points_[k].z;
+
+    //             pk.r = r; pk.g = g; pk.b = b;
+
+    //             objs->push_back(pk);
+    //         }
+    //     }
+    //     std::cout << "stem_position NUM: " << stem_position->size() << std::endl;
+    //     pcl::io::savePCDFile(data_path+"/data/snj/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
+    //     pcl::io::savePCDFile(data_path+"/data/snj/" + std::to_string(i) + "-stems.pcd", *objs);
+    // }
+    
+    // // discarded clusters
+    // std::cout << "discarded clusters NUM: " << GTIN_map->discarded_clusters_vec.size() << std::endl;
+    // for(int i=0; i<GTIN_map->discarded_clusters_vec.size(); i++)
+    // {
+    //     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
+    //     for(int j=0; j<GTIN_map->discarded_clusters_vec[i].size(); j++)
+    //     {
+    //         // get the stem points with different colors
+    //         pcl::PointXYZRGB pk;
+    //         double r = rand()/256; double g = rand()/256; double b = rand()/256;
+    //         for(int k=0; k<GTIN_map->discarded_clusters_vec[i][j].points_.size(); k++)
+    //         {
+    //             pk.x = GTIN_map->discarded_clusters_vec[i][j].points_[k].x;
+    //             pk.y = GTIN_map->discarded_clusters_vec[i][j].points_[k].y;
+    //             pk.z = GTIN_map->discarded_clusters_vec[i][j].points_[k].z;
+
+    //             pk.r = r; pk.g = g; pk.b = b;
+
+    //             objs->push_back(pk);
+    //         }
+    //     }
+    //     std::cout << "current station discard_cluster NUM: " << GTIN_map->discarded_clusters_vec[i].size() << std::endl;
+    //     pcl::io::savePCDFile(data_path+"/data/snj/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
+    // }
+    // /************for display the stem and its position*************/
 
     std::vector<CandidateInfo> candidates_vec;
     std::vector<TLSPos> tlsVec;
@@ -237,42 +223,26 @@ int main(int argc, char **argv)
     // calculated the initial pos of each TLS station
     RelaToAbs(candidates_vec, tlsVec);
     
-    // // TLSPos initNode;
-    // // initNode.ID = 0;
-    // // initNode.R = Eigen::Matrix3d::Identity();
-    // // initNode.t = Eigen::Vector3d::Zero();
-    // // initNode.isValued = true;
-    // // std::unordered_set<int> visited;
-    // // AbsByDFS(0, initNode, candidates_vec, tlsVec, visited);
-    
-    //  calculated the ground truth of each TLS station
-    std::vector<Eigen::Affine3d> tlsTrans;
-    for(int i=0; i<StationNUM; i++)
-    {
-        Eigen::Affine3d currPos;
-        if(i==0)
-        {
-            currPos = Eigen::Affine3d::Identity();
-            tlsTrans.push_back(currPos);
-        }
-        else
-        {
-            currPos =  Eigen::Translation3d(effectivenessData[i-1].first) * effectivenessData[i-1].second;
-            tlsTrans.push_back(currPos);
-        }
-    }
+    // TLSPos initNode;
+    // initNode.ID = 0;
+    // initNode.R = Eigen::Matrix3d::Identity();
+    // initNode.t = Eigen::Vector3d::Zero();
+    // initNode.isValued = true;
+    // std::unordered_set<int> visited;
+    // AbsByDFS(0, initNode, candidates_vec, tlsVec, visited);
+
     // calculated the error of each station
     std::vector<PosError> rough_errors;
     accur_evaluation_vec(tlsVec, tlsTrans, rough_errors);
-    write_error_vec(data_path+"/data/tj/roughError.txt", rough_errors);
-    write_pose(data_path+"/data/tj/roughPoses.txt", tlsVec);
+    write_error_vec(data_path+"/data/snj/roughError.txt", rough_errors);
+    write_pose(data_path+"/data/snj/roughPoses.txt", tlsVec);
 
     // GTSAM optimization
     std::cout << BOLDGREEN << "----------------GTSAM Optimization----------------" << RESET << std::endl;
     double gtsam_dt1 = 0, gtsam_dt2 = 0;
     auto t_4 = std::chrono::high_resolution_clock::now();
     std::pair<double, double> var;
-    var.first = 1e-4; var.second = 1e-2;
+    var.first = 1e-2; var.second = 9e-2;
     gtsam::Values result;
     GTSAMOptimization(tlsVec, candidates_vec, result, var);
 
@@ -286,8 +256,8 @@ int main(int argc, char **argv)
     // GTSAM accuracy evoluation
     std::vector<PosError> gtsam_errors;
     accur_evaluation_vec(optiTLSVec, tlsTrans, gtsam_errors);
-    write_error_vec(data_path+"/data/tj/GTSAMError.txt", gtsam_errors);
-    write_pose(data_path+"/data/tj/GTSAMPoses.txt", optiTLSVec);
+    write_error_vec(data_path+"/data/snj/GTSAMError.txt", gtsam_errors);
+    write_pose(data_path+"/data/snj/GTSAMPoses.txt", optiTLSVec);
 
     // Fine registration Using ICP
     std::cout << BOLDGREEN << "----------------ICP Fine Registration----------------" << RESET << std::endl;
@@ -298,11 +268,9 @@ int main(int argc, char **argv)
         // get the currentID and target station
         pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_target(new pcl::PointCloud<pcl::PointXYZ>);
         int currID = candidates_vec[i].currFrameID;
-        pcl::io::loadPLYFile(data_path+"/data/tj/S"+std::to_string(currID+1)+".ply", *ICP_target);
-        std::cout << data_path+"/data/tj/S"+std::to_string(currID+1)+".ply : " << ICP_target->size() << std::endl;
-
+        readTLSData(data_path+"/data/snj/"+ std::to_string(currID+1) +".las", ICP_target); 
+        
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> curr_transform, cand_transform;
-        // get the current transform
         if(optiTLSVec[currID].isValued)
         {
             // init trans of target
@@ -311,37 +279,32 @@ int main(int argc, char **argv)
 
             curr_transform = matrixInv(curr_transform);
             // trans_point_cloud(curr_transform, ICP_target);
-            // writeLas(data_path+"/data/tj/"+std::to_string(currID+1) +"-rough.las", ICP_target);
+            // writeLas(data_path+"/data/snj/"+std::to_string(currID+1) +"-rough.las", ICP_target);
             // down_sampling_voxel(*ICP_target, 0.03);
         }
-        
-        // update the candidate scan
+        // the candidate scan
         for(int j=0; j<candidates_vec[i].candidateIDScore.size(); j++)
         {
             // get the candidate ID and the scan
             int candID = candidates_vec[i].candidateIDScore[j].first;
             // read the candidate las data
             pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_source(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::io::loadPLYFile(data_path+"/data/tj/S"+std::to_string(candID+1)+".ply", *ICP_source);
-            std::cout << data_path+"/data/tj/S"+std::to_string(candID+1)+".ply : " << ICP_source->size() << std::endl;
+            readTLSData(data_path+"/data/snj/"+ std::to_string(candID+1) +".las", ICP_source);
+
             if(optiTLSVec[candID].isValued)
             {
                 // init trans of source
                 cand_transform.first = optiTLSVec[candID].t;
                 cand_transform.second = optiTLSVec[candID].R;
                 // trans_point_cloud(cand_transform, ICP_source);
-                // writeLas(data_path+"/data/tj/"+std::to_string(candID+1) +"-rough.las", ICP_source);
+                // writeLas(data_path+"/data/snj/"+std::to_string(candID+1) +"-rough.las", ICP_source);
                 
                 // calculate the transformation between target and source and trans to the target
                 std::pair<Eigen::Vector3d, Eigen::Matrix3d> poseBTW;
                 poseBTW = matrixMultip(curr_transform, cand_transform);
                 trans_point_cloud(poseBTW, ICP_source);
-                // writeLas(data_path+"/data/tj/"+std::to_string(candID+1) +"-rough.las", ICP_source);
+                // down_sampling_voxel(*ICP_source, 0.03);
 
-                // down_sampling_voxel(*ICP_source, 0.05);
-                // down_sampling_voxel(*ICP_target, 0.05);
-                
-                // std::cout << "here is good-1" << std::endl;
                 // fine registration by gicp
                 auto t_update_gicp_begin = std::chrono::high_resolution_clock::now();
                 std::pair<Eigen::Vector3d, Eigen::Matrix3d> refine_transform_gicp;
@@ -349,6 +312,7 @@ int main(int argc, char **argv)
                 small_gicp_registration(ICP_source, ICP_target, refine_transform_gicp);
                 // pcl_gicp_registration(ICP_source, ICP_target, refine_transform_gicp);
                 auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
+
                 std::cout << "FINE: target: " << std::to_string(currID+1) << " source: " << std::to_string(candID+1) << std::endl;
                 std::cout << "[Time] GICP Reg: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
                 
@@ -358,10 +322,6 @@ int main(int argc, char **argv)
                 // get the ICP fine registration
                 std::pair<Eigen::Vector3d, Eigen::Matrix3d> fine_trans;
                 fine_trans = matrixMultip(refine_transform_gicp, poseBTW);
-                
-                // Debug, save the re-fined point cloud to have a test
-                // trans_point_cloud(refine_transform_gicp, ICP_source);
-                // writeLas(data_path+"/data/tj/"+std::to_string(candID+1) +"-fine.las", ICP_source);
                 
                 // std::cout << fine_trans.first << std::endl;
                 // std::cout << fine_trans.second << std::endl;
@@ -386,8 +346,8 @@ int main(int argc, char **argv)
     RelaToAbs(candidates_vec, optiPosVec);
     std::vector<PosError> ICP_errors;
     accur_evaluation_vec(optiPosVec, tlsTrans, ICP_errors);
-    write_error_vec(data_path+"/data/tj/icpError.txt", ICP_errors);
-    write_pose(data_path+"/data/tj/icpPoses.txt", optiPosVec);
+    write_error_vec(data_path+"/data/snj/icpError.txt", ICP_errors);
+    write_pose(data_path+"/data/snj/icpPoses.txt", optiPosVec);
 
     std::cout << BOLDGREEN << "----------------GTSAM Optimization Again----------------" << RESET << std::endl;
     auto t_6 = std::chrono::high_resolution_clock::now();
@@ -404,11 +364,11 @@ int main(int argc, char **argv)
      
     std::vector<PosError> Final_errors;
     accur_evaluation_vec(finalTLSVec, tlsTrans, Final_errors);
-    write_error_vec(data_path+"/data/tj/finalError.txt", Final_errors);
-    write_pose(data_path+"/data/tj/finalPoses.txt", finalTLSVec);
+    write_error_vec(data_path+"/data/snj/finalError.txt", Final_errors);
+    write_pose(data_path+"/data/snj/finalPoses.txt", finalTLSVec);
 
     // write the running time for each module
-    std::ofstream outfile(data_path+"/data/tj/time_stastic.txt");
+    std::ofstream outfile(data_path+"/data/snj/time_stastic.txt");
     outfile << "Average GenTriDescs_t: " << gen_dt << std::endl;
     outfile << "Average AddTriDescs_t: " << add_dt << std::endl;
     outfile << "Average Search_dt: " << search_dt << std::endl;

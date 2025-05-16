@@ -1,6 +1,6 @@
 #ifndef _TriObj_H_Included_
 #define _TriObj_H_Included_
-#include "TriObj.h"
+#include "../include/utils/TriObj.h"
 #endif
 #include <omp.h>
 

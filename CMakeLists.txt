@@ -42,9 +42,24 @@ link_directories(
   ${OpenCV_LIBRARY_DIRS}
 )
 
+# get global path
+file(GLOB utils_sources ./src/utils/*.cpp)
+file(GLOB gtsam_opti_sources ./src/gtsam_opti/*.cpp)
+
+##########################################################
+#####################Useful Function######################
+##########################################################
+# trans the pcd to las file
+add_executable(pcdToLas ./src/function/pcdToLas.cpp ./src/utils/Hlp.cpp)
+target_compile_options(pcdToLas PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(pcdToLas
+  ${PCL_LIBRARIES} 
+  ${libLAS_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
 # trans between two TLS station, from the registrated to the original pose
-add_executable(TransToOriPose ./src/TransToOriPos.cpp ./src/Hlp.cpp)
-# target_compile_options(TransToOriPose PRIVATE ${OpenMP_CXX_FLAGS})
+add_executable(TransToOriPose ./src/function/TransToOriPos.cpp ./src/utils/Hlp.cpp)
 target_link_libraries(TransToOriPose
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
@@ -52,8 +67,7 @@ target_link_libraries(TransToOriPose
 )
 
 # trans between two TLS station, from the registrated to the original pose
-add_executable(TransToCommon ./src/TransToCommon.cpp ./src/Hlp.cpp)
-# target_compile_options(TransToOriPose PRIVATE ${OpenMP_CXX_FLAGS})
+add_executable(TransToCommon ./src/function/TransToCommon.cpp ./src/utils/Hlp.cpp)
 target_link_libraries(TransToCommon
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
@@ -61,16 +75,22 @@ target_link_libraries(TransToCommon
 )
 
 # trans between two TLS station, from the registrated to the original pose
-add_executable(TransToCommonByOripose ./src/TransToCommonByOripose.cpp ./src/Hlp.cpp)
-# target_compile_options(TransToOriPose PRIVATE ${OpenMP_CXX_FLAGS})
+add_executable(TransToCommonByOripose ./src/function/TransToCommonByOripose.cpp ./src/utils/Hlp.cpp)
 target_link_libraries(TransToCommonByOripose
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
   ${libLAS_LIBRARIES}
 )
+##########################################################
+#####################Useful Function######################
+##########################################################
 
+
+##########################################################
+########################Demo Node#########################
+##########################################################
 # Reg between two TLS station
-add_executable(RegTLSPoints ./src/RegTLS.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(RegTLSPoints ./src/demo/RegTLS.cpp ${utils_sources})
 target_compile_options(RegTLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(RegTLSPoints
   ${PCL_LIBRARIES} 
@@ -84,7 +104,7 @@ set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 target_compile_definitions(RegTLSPoints PRIVATE PROJECT_PATH="${PROJECT_ROOT}")
 
 # Chain Reg TLS
-add_executable(ChainRegTLSPoints ./src/ChainRegTLS.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(ChainRegTLSPoints ./src/demo/ChainRegTLS.cpp ${utils_sources})
 target_compile_options(ChainRegTLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(ChainRegTLSPoints
   ${PCL_LIBRARIES} 
@@ -96,7 +116,7 @@ target_link_libraries(ChainRegTLSPoints
 )
 
 # Multi Reg TLS
-add_executable(MultiRegTLSPoints ./src/MultiRegTLS.cpp ./src/Hlp.cpp ./src/gtsamOpti.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(MultiRegTLSPoints ./src/demo/MultiRegTLS.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegTLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiRegTLSPoints
   ${PCL_LIBRARIES} 
@@ -109,7 +129,7 @@ target_link_libraries(MultiRegTLSPoints
 )
 
 # Reg the Tongji tree dataset
-add_executable(MultiRegTongji ./src/MultiRegTongji.cpp ./src/Hlp.cpp ./src/gtsamOpti.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(MultiRegTongji ./src/demo/MultiRegTongji.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegTongji PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiRegTongji
   ${PCL_LIBRARIES} 
@@ -122,7 +142,7 @@ target_link_libraries(MultiRegTongji
 )
 
 # Multi Reg FGI
-add_executable(MultiRegFGI ./src/MultiRegFGI.cpp ./src/Hlp.cpp ./src/gtsamOpti.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(MultiRegFGI ./src/demo/MultiRegFGI.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegFGI PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiRegFGI
   ${PCL_LIBRARIES} 
@@ -135,7 +155,7 @@ target_link_libraries(MultiRegFGI
 )
 
 # Reg the ETH
-add_executable(MultiRegETH ./src/MultiRegETH.cpp ./src/Hlp.cpp ./src/gtsamOpti.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(MultiRegETH ./src/demo/MultiRegETH.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegETH PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiRegETH
   ${PCL_LIBRARIES} 
@@ -146,21 +166,16 @@ target_link_libraries(MultiRegETH
   libCSF.a
   gtsam
 )
+##########################################################
+########################Demo Node#########################
+##########################################################
 
-# trans the pcd to las file
-add_executable(pcdToLas ./src/pcdToLas.cpp ./src/Hlp.cpp)
-target_compile_options(pcdToLas PRIVATE ${OpenMP_CXX_FLAGS})
-target_link_libraries(pcdToLas
-  ${PCL_LIBRARIES} 
-  ${libLAS_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
-
-# test the dfs algorithm
-add_executable(dfsTest ./src/dfsTest.cpp)
+##########################################################
+########################Test Node#########################
+##########################################################
 
 # Reg between two tower station
-add_executable(TowerReg ./src/TowerReg.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(TowerReg ./src/test/TowerReg.cpp ${utils_sources})
 target_compile_options(TowerReg PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(TowerReg
   ${PCL_LIBRARIES} 
@@ -172,7 +187,7 @@ target_link_libraries(TowerReg
 )
 
 # Reg Multi tower stations
-add_executable(MultiTowerReg ./src/MultiTowerReg.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(MultiTowerReg ./src/test/MultiTowerReg.cpp ${utils_sources})
 target_compile_options(MultiTowerReg PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiTowerReg
   ${PCL_LIBRARIES} 
@@ -184,7 +199,7 @@ target_link_libraries(MultiTowerReg
 )
 
 # Chain Reg tower stations
-add_executable(ChainTowerReg ./src/ChainTowerReg.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
+add_executable(ChainTowerReg ./src/test/ChainTowerReg.cpp ${utils_sources})
 target_compile_options(ChainTowerReg PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(ChainTowerReg
   ${PCL_LIBRARIES} 
@@ -194,3 +209,11 @@ target_link_libraries(ChainTowerReg
   libsmall_gicp.so
   libCSF.a
 )
+
+
+# test the dfs algorithm
+add_executable(dfsTest ./src/test/dfsTest.cpp)
+
+##########################################################
+########################Test Node#########################
+##########################################################

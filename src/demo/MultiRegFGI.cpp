@@ -2,37 +2,37 @@
 
 #ifndef _HLP_H_Included_
 #define _HLP_H_Included_
-#include "Hlp.h"
+#include "../include/utils/Hlp.h"
 #endif
 
 #ifndef _DST_H_Included_
 #define _DST_H_Included_
-#include "DST.h"
+#include "../include/dst/DST.h"
 #endif
 
 #ifndef _GTSAMOPTI_H_Included_
 #define _GTSAMOPTI_H_Included_
-#include "gtsamOpti.h"
+#include "../include/gtsam_opti/gtsamOpti.h"
 #endif
 
 #ifndef _GENALG_H_Included_
 #define _GENALG_H_Included_
-#include "GenAlg.h"
+#include "../include/utils/GenAlg.h"
 #endif
 
 #ifndef _POINT2IMG_H_Included_
 #define _POINT2IMG_H_Included_
-#include "Point2img.h"
+#include "../include/utils/Point2img.h"
 #endif
 
 #ifndef _FEC_H_Included_
 #define _FEC_H_Included_
-#include "FEC.h"
+#include "../include/utils/FEC.h"
 #endif
 
 #ifndef _TriObj_H_Included_
 #define _TriObj_H_Included_
-#include "TriObj.h"
+#include "../include/utils/TriObj.h"
 #endif
 
 // C++

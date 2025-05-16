@@ -1,6 +1,6 @@
 #ifndef _FEC_H_Included_
 #define _FEC_H_Included_
-#include "FEC.h"
+#include "../include/utils/FEC.h"
 #endif
 
 // compare the nuber tag of two points

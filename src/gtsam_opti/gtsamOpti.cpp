@@ -1,6 +1,6 @@
 #ifndef _GTSAMOPTI_H_Included_
 #define _GTSAMOPTI_H_Included_
-#include "gtsamOpti.h"
+#include "../include/gtsam_opti/gtsamOpti.h"
 #endif
 
 // gtsam result to the tls pose

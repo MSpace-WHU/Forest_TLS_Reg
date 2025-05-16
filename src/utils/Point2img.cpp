@@ -1,7 +1,7 @@
 
 #ifndef _POINT2IMG_H_Included_
 #define _POINT2IMG_H_Included_
-#include "Point2img.h"
+#include "../include/utils/Point2img.h"
 #endif
 
 void point2img(pcl::PointCloud<pcl::PointXYZ>::Ptr ori_pc,

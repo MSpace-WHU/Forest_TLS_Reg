@@ -2,17 +2,17 @@
 
 #ifndef _HLP_H_Included_
 #define _HLP_H_Included_
-#include "Hlp.h"
+#include "../include/utils/Hlp.h"
 #endif
 
 #ifndef _DST_H_Included_
 #define _DST_H_Included_
-#include "DST.h"
+#include "../include/dst/DST.h"
 #endif
 
 #ifndef _GENALG_H_Included_
 #define _GENALG_H_Included_
-#include "GenAlg.h"
+#include "../include/utils/GenAlg.h"
 #endif
 
 #include <iostream>

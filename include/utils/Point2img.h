@@ -1,12 +1,12 @@
 
 #ifndef _DST_H_Included_
 #define _DST_H_Included_
-#include "DST.h"
+#include "../include/dst/DST.h"
 #endif
 
 #ifndef _HLP_H_Included_
 #define _HLP_H_Included_
-#include "Hlp.h"
+#include "../include/utils/Hlp.h"
 #endif
 
 #include <pcl/point_cloud.h>

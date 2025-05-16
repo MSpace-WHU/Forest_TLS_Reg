@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(RegTLSPoints)
+project(ForestTLSReg)
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_FLAGS "-std=c++17")
@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # find PCL, version 1.8 (system), may confilict with GTSAM or smallGICP 
 # find_package(PCL 1.8 REQUIRED QUIET)
 
-# self builded, for smallGICP
+# find PCL, self builded, for smallGICP
 set(PCL_DIR "/home/xiaochen/pcl-1.12.0/share/pcl-1.12")
 find_package(PCL 1.12 REQUIRED)
 # message(${PCL_INCLUDE_DIRS})
@@ -49,7 +49,6 @@ target_link_libraries(TransToOriPose
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
   ${libLAS_LIBRARIES}
-  # ${Boost_LIBRARIES}
 )
 
 # trans between two TLS station, from the registrated to the original pose
@@ -78,13 +77,11 @@ target_link_libraries(RegTLSPoints
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # # libfast_gicp.so
   libCSF.a
   libsmall_gicp.so
 )
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 target_compile_definitions(RegTLSPoints PRIVATE PROJECT_PATH="${PROJECT_ROOT}")
-
 
 # Chain Reg TLS
 add_executable(ChainRegTLSPoints ./src/ChainRegTLS.cpp ./src/Hlp.cpp ./src/GenAlg.cpp ./src/Point2img.cpp ./src/FEC.cpp ./src/TriObj.cpp)
@@ -94,7 +91,6 @@ target_link_libraries(ChainRegTLSPoints
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
 )
@@ -107,7 +103,6 @@ target_link_libraries(MultiRegTLSPoints
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
   gtsam
@@ -121,7 +116,6 @@ target_link_libraries(MultiRegTongji
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
   gtsam
@@ -135,7 +129,6 @@ target_link_libraries(MultiRegFGI
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
   gtsam
@@ -149,7 +142,6 @@ target_link_libraries(MultiRegETH
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
   gtsam
@@ -175,7 +167,6 @@ target_link_libraries(TowerReg
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
 )
@@ -188,7 +179,6 @@ target_link_libraries(MultiTowerReg
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
 )
@@ -201,7 +191,6 @@ target_link_libraries(ChainTowerReg
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
   ${libLAS_LIBRARIES}
-  # libfast_gicp.so
   libsmall_gicp.so
   libCSF.a
 )

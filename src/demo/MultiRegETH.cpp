@@ -58,7 +58,8 @@ int main(int argc, char **argv)
         std::cout << "USAGE: ./MultiRegETH [NUM of Stations]" << std::endl;
         return 1;
     }
-    std::string data_path = "/home/xiaochen/workspace/Forest_TLS_Reg_ws";
+    // project data path
+    std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;

@@ -48,7 +48,6 @@ int main(int argc, char **argv)
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     std::cout << BOLDGREEN << "--------------------Reading-------------------" << RESET << std::endl;
     std::cout << BOLDGREEN << data_path+"/config/snj_para.yaml" << RESET << std::endl;
-    std::cout << BOLDGREEN << data_path+"/config/snj_para.yaml" << RESET << std::endl;
     // read the setting parameters
     ConfigSetting config_setting;
     ReadParas(data_path+"/config/snj_para.yaml", config_setting);

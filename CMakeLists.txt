@@ -15,11 +15,11 @@ find_package(PCL 1.12 REQUIRED)
 # message(${PCL_INCLUDE_DIRS})
 # message(STATUS "PCL_LIBRARIES: ${PCL_LIBRARIES}")
 
+# find third party library
 find_package(OpenCV REQUIRED QUIET)
 find_package(Eigen3 REQUIRED)
 find_package(libLAS REQUIRED)
 find_package(GTSAM REQUIRED QUIET)
-
 find_package(OpenMP REQUIRED)
 if(OPENMP_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -27,6 +27,7 @@ if(OPENMP_FOUND)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+# include directories
 include_directories(
   include
   ${PCL_INCLUDE_DIRS}
@@ -42,7 +43,11 @@ link_directories(
   ${OpenCV_LIBRARY_DIRS}
 )
 
-# get global path
+# set the global path variable
+set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
+add_compile_definitions(PROJECT_PATH="${PROJECT_ROOT}")
+
+# find file's global path
 file(GLOB utils_sources ./src/utils/*.cpp)
 file(GLOB gtsam_opti_sources ./src/gtsam_opti/*.cpp)
 
@@ -89,10 +94,10 @@ target_link_libraries(TransToCommonByOripose
 ##########################################################
 ########################Demo Node#########################
 ##########################################################
-# Reg between two TLS station
-add_executable(RegTLSPoints ./src/demo/RegTLS.cpp ${utils_sources})
-target_compile_options(RegTLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
-target_link_libraries(RegTLSPoints
+# Reg between two TLS stations
+add_executable(Reg2TLSPoints ./src/demo/Reg2TLS.cpp ${utils_sources})
+target_compile_options(Reg2TLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(Reg2TLSPoints
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
@@ -100,10 +105,8 @@ target_link_libraries(RegTLSPoints
   libCSF.a
   libsmall_gicp.so
 )
-set(PROJECT_ROOT ${CMAKE_SOURCE_DIR})
-target_compile_definitions(RegTLSPoints PRIVATE PROJECT_PATH="${PROJECT_ROOT}")
 
-# Chain Reg TLS
+# Reg TLS Chain
 add_executable(ChainRegTLSPoints ./src/demo/ChainRegTLS.cpp ${utils_sources})
 target_compile_options(ChainRegTLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(ChainRegTLSPoints
@@ -128,7 +131,7 @@ target_link_libraries(MultiRegTLSPoints
   gtsam
 )
 
-# Reg the Tongji tree dataset
+# Reg Tongji tree dataset
 add_executable(MultiRegTongji ./src/demo/MultiRegTongji.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegTongji PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(MultiRegTongji
@@ -170,6 +173,7 @@ target_link_libraries(MultiRegETH
 ########################Demo Node#########################
 ##########################################################
 
+
 ##########################################################
 ########################Test Node#########################
 ##########################################################
@@ -209,7 +213,6 @@ target_link_libraries(ChainTowerReg
   libsmall_gicp.so
   libCSF.a
 )
-
 
 # test the dfs algorithm
 add_executable(dfsTest ./src/test/dfsTest.cpp)

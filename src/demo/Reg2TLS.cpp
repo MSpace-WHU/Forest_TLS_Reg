@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     // check the num of parameters
     if (argc < 2) {
         std::cout << RED << "Error, at least 2 parameter" << RESET << std::endl;
-        std::cout << "USAGE: ./Reg2TLS [Target Station's File Name] [Source Station's File Name]" << std::endl;
+        std::cout << "USAGE: ./Reg2TLSPoints [Target Station's File Name] [Source Station's File Name]" << std::endl;
         return 1;
     }
 

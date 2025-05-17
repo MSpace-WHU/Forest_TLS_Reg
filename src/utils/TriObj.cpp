@@ -648,8 +648,6 @@ void GTINDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &inp
     curr_frame_info.currCenterFix.reset(new pcl::PointCloud<pcl::PointXYZINormal>);
     curr_frame_info.currPoints.reset(new pcl::PointCloud<pcl::PointXYZ>);
     init_cluster(input_cloud);
-    // init_clusterTLS(input_cloud);
-    // std::cout << BOLDRED << "obj_clusters[2] : " << obj_clusters[2].center_[2] << ", p_center_.z: " << obj_clusters[2].p_center_.z << RESET << std::endl;
 
     getPoint(curr_frame_info);
     // std::cout << "curr_frame_info.currCenter->points.size(): " 

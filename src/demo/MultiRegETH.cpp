@@ -49,7 +49,6 @@ using namespace pcl;
 using namespace Eigen;
 using namespace gtsam;
 
-
 int main(int argc, char **argv) 
 {
     // check the num of parameters

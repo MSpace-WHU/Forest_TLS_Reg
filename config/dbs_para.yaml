@@ -1,5 +1,5 @@
 %YAML:1.0
-# point to img
+# point to img (set by your sensor configuration)
 imgRow: 10800
 imgCol: 4500
 

@@ -94,7 +94,7 @@ target_link_libraries(TransToCommonByOripose
 ##########################################################
 ########################Demo Node#########################
 ##########################################################
-# Reg between two TLS stations
+# Reg two TLS stations
 add_executable(Reg2TLSPoints ./src/demo/Reg2TLS.cpp ${utils_sources})
 target_compile_options(Reg2TLSPoints PRIVATE ${OpenMP_CXX_FLAGS})
 target_link_libraries(Reg2TLSPoints

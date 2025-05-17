@@ -44,6 +44,13 @@ using namespace Eigen;
 
 int main(int argc, char **argv) 
 {
+    // check the num of parameters
+    if (argc < 2) {
+        std::cout << RED << "Error, at least 2 parameter" << RESET << std::endl;
+        std::cout << "USAGE: ./Reg2TLS [Target Station's File Name] [Source Station's File Name]" << std::endl;
+        return 1;
+    }
+
     std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     std::cout << BOLDGREEN << "--------------------Reading-------------------" << RESET << std::endl;
@@ -75,29 +82,29 @@ int main(int argc, char **argv)
     GTIN_map->AddTriDescs(currMap);
     
     // generate the tri descriptor (Source)
-    FrameInfo searchMap;
-    GTIN_map->GenTriDescs(source_data, searchMap);
-    writeLas(data_path+"/data/snj/"+ argv[2]+"-obj.las", searchMap.currPoints);
-    pcl::io::savePCDFileASCII(data_path+"/data/snj/"+ argv[2]+"-obj_center.pcd", *searchMap.currCenter);
+    FrameInfo source_tls_info;
+    GTIN_map->GenTriDescs(source_data, source_tls_info);
+    writeLas(data_path+"/data/snj/"+ argv[2]+"-obj.las", source_tls_info.currPoints);
+    pcl::io::savePCDFileASCII(data_path+"/data/snj/"+ argv[2]+"-obj_center.pcd", *source_tls_info.currCenter);
     
-    std::cout << BOLDGREEN << "----------------Searching----------------" << RESET << std::endl;
+    std::cout << BOLDGREEN << "----------------Searching Triangle Pairs----------------" << RESET << std::endl;
     auto t_query_begin = std::chrono::high_resolution_clock::now();
     std::pair<int, double> search_result(-1, 0);
     std::pair<Eigen::Vector3d, Eigen::Matrix3d> loop_transform;
     loop_transform.first << 0, 0, 0;
     loop_transform.second = Eigen::Matrix3d::Identity();
     std::vector<std::pair<TriDesc, TriDesc>> loop_triangle_pair;
-    GTIN_map->SearchPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
+    GTIN_map->SearchPosition(source_tls_info, search_result, loop_transform, loop_triangle_pair);
     auto t_query_end = std::chrono::high_resolution_clock::now();
     std::cout << "[Time] query: " << time_inc(t_query_end, t_query_begin) << "ms" << std::endl;
 
-    std::cout << "search_result: " << search_result.first << ", " << search_result.second << std::endl;
-    std::cout << "loop_transform.first: \n" << loop_transform.first << std::endl;
-    std::cout << "loop_transform.second: \n" << loop_transform.second << std::endl;
+    // std::cout << "search_result: " << search_result.first << ", " << search_result.second << std::endl;
+    // std::cout << "loop_transform.first: \n" << loop_transform.first << std::endl;
+    // std::cout << "loop_transform.second: \n" << loop_transform.second << std::endl;
 
-    std::cout << "FrameID: " << currMap.frame_id_
-            << " triangles NUM: " << currMap.desc_.size() 
-            << " feature points: "<< currMap.currCenter->points.size() << std::endl;    
+    // std::cout << "FrameID: " << currMap.frame_id_
+    //         << " triangles NUM: " << currMap.desc_.size() 
+    //         << " feature points: "<< currMap.currCenter->points.size() << std::endl;    
     
     // find the corresponding TLS
     if(search_result.first != -1)
@@ -112,15 +119,14 @@ int main(int argc, char **argv)
         // writeLas(data_path+"/data/snj/"+ argv[2]+"-rough_trans.las", source_data);
         
         // trans obj points, and save (rough trans data)
-        trans_point_cloud(loop_transform, searchMap.currPoints);
-        // writeLas(data_path+"/data/snj/"+ argv[2]+"-obj-transed.las", searchMap.currPoints);
+        trans_point_cloud(loop_transform, source_tls_info.currPoints);
+        // writeLas(data_path+"/data/snj/"+ argv[2]+"-obj-transed.las", source_tls_info.currPoints);
         
         // down_sampling_voxel(*target_data, 0.03);
         std::cout << BOLDGREEN << "----------------Fine Registrating----------------" << RESET << std::endl;
         // fine registration by GICP
         auto t_update_gicp_begin = std::chrono::high_resolution_clock::now();
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> refine_transform_gicp;
-
         small_gicp_registration(source_data, target_data, refine_transform_gicp);
         // pcl_gicp_registration(source_data, target_data, refine_transform_gicp);
         auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
@@ -140,7 +146,11 @@ int main(int argc, char **argv)
         accur_evaluation(fine_trans, gt_pose, fine_error);
         write_error(data_path+"/data/snj/"+ argv[2]+"-fine-error.txt", fine_error);
     }
+    else
+    {
+        std::cout << BOLDRED << "----------------Failed Registration, Check Parameters----------------" << RESET << std::endl;
+    }
 
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
     return 0;
-    }
+}

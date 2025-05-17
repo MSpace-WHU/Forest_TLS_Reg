@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     std::cout << BOLDBLUE << "Average GenTriDescs_t: " << gen_dt << " Average AddTriDescs_t: " << add_dt << RESET << std::endl;
     
 
-    // /************for display, the range image, stem and its position*************/
+    // /************DEBUG: for display, the range image, stem and its position*************/
     // // range images
     // std::cout << "range images NUM: " << GTIN_map->pointMat_vec_.size() << std::endl;
     // for(int i=0; i<GTIN_map->pointMat_vec_.size(); i++)

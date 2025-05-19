@@ -210,5 +210,5 @@ make
 ## :pencil: 参考引用
 如果您使用了本项目，请引用文章：
 
-## :mailbox: Contact Information
+## :mailbox: 联系作者
 如果您在使用过程中有任何问题，请随时联系我: xchwang@whu.edu.cn

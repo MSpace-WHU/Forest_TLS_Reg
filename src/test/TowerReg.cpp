@@ -52,27 +52,27 @@ int main(int argc, char **argv)
     ReadParas(data_path+"/config/tower_para.yaml", config_setting);
 
     std::cout << BOLDGREEN << "--------------------Reading Las Data-------------------" << RESET << std::endl;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr target_data(new pcl::PointCloud<pcl::PointXYZ>);
-    readTLSData(data_path+"/data/tower/"+ argv[1]+".las", target_data);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr reference_data(new pcl::PointCloud<pcl::PointXYZ>);
+    readTLSData(data_path+"/data/tower/"+ argv[1]+".las", reference_data);
     pcl::PointCloud<pcl::PointXYZ>::Ptr source_data(new pcl::PointCloud<pcl::PointXYZ>);
     readTLSData(data_path+"/data/tower/"+ argv[2]+".las", source_data);
     
-    std::cout << "Read Target Points NUM: " << target_data->size() << std::endl;
+    std::cout << "Read Target Points NUM: " << reference_data->size() << std::endl;
     std::cout << "Read Source Points NUM: " << source_data->size() << std::endl;
     
     std::cout << BOLDGREEN << "----------------Generate Descriptor----------------" << RESET << std::endl;
-    GTINDescManager *GTIN_map = new GTINDescManager(config_setting);
+    HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
     // generate the tri descriptor and save (Target)
-    FrameInfo currMap;
-    GTIN_map->GenTriDescs(target_data, currMap);
+    FrameInfo reference_tls_info;
+    HashReg_RefTLS->GenTriDescs(reference_data, reference_tls_info);
     
-    writeLas(data_path+"/data/tower/"+ argv[1]+"-obj.las", currMap.currPoints);
-    pcl::io::savePCDFileASCII(data_path+"/data/tower/"+ argv[1]+"-obj_center.pcd", *currMap.currCenter);
-    GTIN_map->AddTriDescs(currMap);
+    writeLas(data_path+"/data/tower/"+ argv[1]+"-obj.las", reference_tls_info.currPoints);
+    pcl::io::savePCDFileASCII(data_path+"/data/tower/"+ argv[1]+"-obj_center.pcd", *reference_tls_info.currCenter);
+    HashReg_RefTLS->AddTriDescs(reference_tls_info);
     
     // generate the tri descriptor (Source)
     FrameInfo searchMap;
-    GTIN_map->GenTriDescs(source_data, searchMap);
+    HashReg_RefTLS->GenTriDescs(source_data, searchMap);
     writeLas(data_path+"/data/tower/"+ argv[2]+"-obj.las", searchMap.currPoints);
     pcl::io::savePCDFileASCII(data_path+"/data/tower/"+ argv[2]+"-obj_center.pcd", *searchMap.currCenter);
    
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     loop_transform.first << 0, 0, 0;
     loop_transform.second = Eigen::Matrix3d::Identity();
     std::vector<std::pair<TriDesc, TriDesc>> loop_triangle_pair;
-    GTIN_map->SearchPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
+    HashReg_RefTLS->SearchPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
     auto t_query_end = std::chrono::high_resolution_clock::now();
     std::cout << "[Time] query: " << time_inc(t_query_end, t_query_begin) << "ms" << std::endl;
 
@@ -91,9 +91,9 @@ int main(int argc, char **argv)
     std::cout << "loop_transform.first: \n" << loop_transform.first << std::endl;
     std::cout << "loop_transform.second: \n" << loop_transform.second << std::endl;
 
-    std::cout << "FrameID: " << currMap.frame_id_
-            << " triangles NUM: " << currMap.desc_.size() 
-            << " feature points: "<< currMap.currCenter->points.size() << std::endl;
+    std::cout << "FrameID: " << reference_tls_info.frame_id_
+            << " triangles NUM: " << reference_tls_info.desc_.size() 
+            << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;
 
     // find the corresponding TLS
     if(search_result.first != -1)
@@ -106,15 +106,15 @@ int main(int argc, char **argv)
         trans_point_cloud(loop_transform, searchMap.currPoints);
         // writeLas(data_path+"/data/tower/"+ argv[2]+"-obj-transed.las", searchMap.currPoints);
         
-        // down_sampling_voxel(*target_data, 0.03);
+        // down_sampling_voxel(*reference_data, 0.03);
         std::cout << BOLDGREEN << "----------------Fine Registrating----------------" << RESET << std::endl;
         // fine registration by GICP
         auto t_update_gicp_begin = std::chrono::high_resolution_clock::now();
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> refine_transform_gicp;
         // std::cout << "Here is good!" << std::endl;
-        // fast_gicp_registration(source_data, target_data, refine_transform_gicp);
-        small_gicp_registration(source_data, target_data, refine_transform_gicp);
-        // pcl_gicp_registration(source_data, target_data, refine_transform_gicp);
+        // fast_gicp_registration(source_data, reference_data, refine_transform_gicp);
+        small_gicp_registration(source_data, reference_data, refine_transform_gicp);
+        // pcl_gicp_registration(source_data, reference_data, refine_transform_gicp);
         auto t_update_gicp_end = std::chrono::high_resolution_clock::now();
         std::cout << "[Time] Small_GICP: " << time_inc(t_update_gicp_end, t_update_gicp_begin) << "ms" << std::endl;  
 

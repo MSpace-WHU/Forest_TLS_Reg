@@ -108,7 +108,7 @@ void pcl_gicp_registration(pcl::PointCloud<pcl::PointXYZ>::Ptr &source,
                             pcl::PointCloud<pcl::PointXYZ>::Ptr &target,
                             std::pair<Eigen::Vector3d, Eigen::Matrix3d> &refine_transform);
                             
-class GTINDescManager
+class HashRegDescManager
 {
 public:
     ConfigSetting config_setting_;
@@ -184,7 +184,7 @@ public:
     void build_stdesc(FrameInfo &curr_frame_info);
 
     // construct function
-    GTINDescManager(ConfigSetting &config_setting) : config_setting_(config_setting)
+    HashRegDescManager(ConfigSetting &config_setting) : config_setting_(config_setting)
     {
         current_frame_id_ = 0;
     }

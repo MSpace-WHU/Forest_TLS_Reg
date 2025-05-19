@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> gt_pose;
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> fine_pose;
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> rough_error, fine_error;
-    GTINDescManager *GTIN_map = new GTINDescManager(config_setting);
+    HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
     std::vector<FrameInfo> frameInfoVec;
     double gen_dt = 0, add_dt = 0;
     int StationNUM = std::atoi(argv[1]);
@@ -86,21 +86,21 @@ int main(int argc, char **argv)
 
         std::cout << BOLDGREEN << "----------------Generate Descriptor----------------" << RESET << std::endl;
         // generate the tri descriptor and save (Target)
-        FrameInfo currMap;
+        FrameInfo reference_tls_info;
         auto t_1 = std::chrono::high_resolution_clock::now();
-        GTIN_map->GenTriDescs(tls_point_data, currMap);
+        HashReg_RefTLS->GenTriDescs(tls_point_data, reference_tls_info);
         auto t_2 = std::chrono::high_resolution_clock::now();
-        GTIN_map->AddTriDescs(currMap);
+        HashReg_RefTLS->AddTriDescs(reference_tls_info);
         auto t_3 = std::chrono::high_resolution_clock::now();
         
         gen_dt += time_inc(t_2, t_1);
         add_dt += time_inc(t_3, t_2);
 
-        frameInfoVec.push_back(currMap);
+        frameInfoVec.push_back(reference_tls_info);
         
-        std::cout << "FrameID: " << currMap.frame_id_
-                << " triangles NUM: " << currMap.desc_.size() 
-                << " feature points: "<< currMap.currCenter->points.size() << std::endl;  
+        std::cout << "FrameID: " << reference_tls_info.frame_id_
+                << " triangles NUM: " << reference_tls_info.desc_.size() 
+                << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;  
     }
     
     gen_dt = gen_dt/StationNUM;
@@ -110,47 +110,47 @@ int main(int argc, char **argv)
     
     /************for display, the range image, stem and its position*************/
     // range images
-    std::cout << "range images NUM: " << GTIN_map->pointMat_vec_.size() << std::endl;
-    for(int i=0; i<GTIN_map->pointMat_vec_.size(); i++)
+    std::cout << "range images NUM: " << HashReg_RefTLS->pointMat_vec_.size() << std::endl;
+    for(int i=0; i<HashReg_RefTLS->pointMat_vec_.size(); i++)
     {
-        resizePixVal(GTIN_map->pointMat_vec_[i]); // resize the pixel value into [0-1]
-        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-ori_fig.png", GTIN_map->pointMat_vec_[i]); 
+        resizePixVal(HashReg_RefTLS->pointMat_vec_[i]); // resize the pixel value into [0-1]
+        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-ori_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
 
         // save the filtered fig
-        for(int j=0; j<GTIN_map->pointMat_vec_[i].rows; j++)
+        for(int j=0; j<HashReg_RefTLS->pointMat_vec_[i].rows; j++)
         {
-            for(int k=0; k<GTIN_map->pointMat_vec_[i].cols; k++)
+            for(int k=0; k<HashReg_RefTLS->pointMat_vec_[i].cols; k++)
             {
-                if(GTIN_map->pointTypeMat_vec_[i].at<float>(j, k) != 1)
+                if(HashReg_RefTLS->pointTypeMat_vec_[i].at<float>(j, k) != 1)
                 {
-                    GTIN_map->pointMat_vec_[i].at<float>(j, k) = 0;
+                    HashReg_RefTLS->pointMat_vec_[i].at<float>(j, k) = 0;
                 }
             }
         }
-        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-filterd_fig.png", GTIN_map->pointMat_vec_[i]); 
+        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-filterd_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
     }
 
     // stem position and its points cloud
-    std::cout << "clusters_vec_ NUM: " << GTIN_map->clusters_vec_.size() << std::endl;
-    for(int i=0; i<GTIN_map->clusters_vec_.size(); i++)
+    std::cout << "clusters_vec_ NUM: " << HashReg_RefTLS->clusters_vec_.size() << std::endl;
+    for(int i=0; i<HashReg_RefTLS->clusters_vec_.size(); i++)
     {
         pcl::PointCloud<pcl::PointXYZINormal>::Ptr stem_position(new pcl::PointCloud<pcl::PointXYZINormal>);
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
         
-        for(int j=0; j<GTIN_map->clusters_vec_[i].size(); j++)
+        for(int j=0; j<HashReg_RefTLS->clusters_vec_[i].size(); j++)
         {
             // get the stem position
-            pcl::PointXYZINormal p = GTIN_map->clusters_vec_[i][j].p_center_;    
+            pcl::PointXYZINormal p = HashReg_RefTLS->clusters_vec_[i][j].p_center_;    
             stem_position->push_back(p);
             
             // get the stem points with different colors
             pcl::PointXYZRGB pk;
             double r = rand()/256; double g = rand()/256; double b = rand()/256;
-            for(int k=0; k<GTIN_map->clusters_vec_[i][j].points_.size(); k++)
+            for(int k=0; k<HashReg_RefTLS->clusters_vec_[i][j].points_.size(); k++)
             {
-                pk.x = GTIN_map->clusters_vec_[i][j].points_[k].x;
-                pk.y = GTIN_map->clusters_vec_[i][j].points_[k].y;
-                pk.z = GTIN_map->clusters_vec_[i][j].points_[k].z;
+                pk.x = HashReg_RefTLS->clusters_vec_[i][j].points_[k].x;
+                pk.y = HashReg_RefTLS->clusters_vec_[i][j].points_[k].y;
+                pk.z = HashReg_RefTLS->clusters_vec_[i][j].points_[k].z;
 
                 pk.r = r; pk.g = g; pk.b = b;
 
@@ -162,32 +162,31 @@ int main(int argc, char **argv)
         pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stems.pcd", *objs);
     }
     
-    // discarded clusters
-    std::cout << "discarded clusters NUM: " << GTIN_map->discarded_clusters_vec.size() << std::endl;
-    for(int i=0; i<GTIN_map->discarded_clusters_vec.size(); i++)
-    {
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
-        for(int j=0; j<GTIN_map->discarded_clusters_vec[i].size(); j++)
-        {
-            // get the stem points with different colors
-            pcl::PointXYZRGB pk;
-            double r = rand()/256; double g = rand()/256; double b = rand()/256;
-            for(int k=0; k<GTIN_map->discarded_clusters_vec[i][j].points_.size(); k++)
-            {
-                pk.x = GTIN_map->discarded_clusters_vec[i][j].points_[k].x;
-                pk.y = GTIN_map->discarded_clusters_vec[i][j].points_[k].y;
-                pk.z = GTIN_map->discarded_clusters_vec[i][j].points_[k].z;
+    // // discarded clusters
+    // std::cout << "discarded clusters NUM: " << HashReg_RefTLS->discarded_clusters_vec.size() << std::endl;
+    // for(int i=0; i<HashReg_RefTLS->discarded_clusters_vec.size(); i++)
+    // {
+    //     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
+    //     for(int j=0; j<HashReg_RefTLS->discarded_clusters_vec[i].size(); j++)
+    //     {
+    //         // get the stem points with different colors
+    //         pcl::PointXYZRGB pk;
+    //         double r = rand()/256; double g = rand()/256; double b = rand()/256;
+    //         for(int k=0; k<HashReg_RefTLS->discarded_clusters_vec[i][j].points_.size(); k++)
+    //         {
+    //             pk.x = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].x;
+    //             pk.y = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].y;
+    //             pk.z = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].z;
 
-                pk.r = r; pk.g = g; pk.b = b;
+    //             pk.r = r; pk.g = g; pk.b = b;
 
-                objs->push_back(pk);
-            }
-        }
-        std::cout << "current station discard_cluster NUM: " << GTIN_map->discarded_clusters_vec[i].size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
-    }
-    /************for display the stem and its position*************/
-
+    //             objs->push_back(pk);
+    //         }
+    //     }
+    //     std::cout << "current station discard_cluster NUM: " << HashReg_RefTLS->discarded_clusters_vec[i].size() << std::endl;
+    //     pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
+    // }
+    // /************for display the stem and its position*************/
 
     std::vector<CandidateInfo> candidates_vec;
     std::vector<TLSPos> tlsVec;
@@ -201,7 +200,7 @@ int main(int argc, char **argv)
         std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> loop_transform;
         std::vector<std::vector<std::pair<TriDesc, TriDesc>>> loop_triangle_pair;
         FrameInfo searchMap = frameInfoVec[i];
-        GTIN_map->SearchMultiPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
+        HashReg_RefTLS->SearchMultiPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
         auto t_query_end = std::chrono::high_resolution_clock::now();
         std::cout << "[Time] query: " << time_inc(t_query_end, t_query_begin) << "ms" << std::endl;
         search_dt += time_inc(t_query_end, t_query_begin);

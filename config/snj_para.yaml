@@ -23,7 +23,7 @@ merge_dist: 0.1
 linearityThres: 0.95
 scateringThres: 0.05
 upThres: 0.3
-clusterHeight: 1.5
+clusterHeight: 1.5  # cluster height
 centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
 
 # for tri descriptor

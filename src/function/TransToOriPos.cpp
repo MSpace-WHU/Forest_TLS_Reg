@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         Eigen::Affine3d transINV = tlsTrans[i].inverse();
         pcl::PointCloud<pcl::PointXYZ>::Ptr las_data(new pcl::PointCloud<pcl::PointXYZ>);
         readTLSData(data_path+"/data/snj/" + argv[1] + "-" +to_string(i+1)+".las", las_data);
-        std::cout << "target_data-" << to_string(i+1) << ": " << las_data->size() << std::endl;
+        std::cout << "reference_data-" << to_string(i+1) << ": " << las_data->size() << std::endl;
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr out_data(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::transformPointCloud(*las_data, *out_data, transINV.matrix());

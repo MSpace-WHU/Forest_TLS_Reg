@@ -641,7 +641,7 @@ void pcl_gicp_registration(pcl::PointCloud<pcl::PointXYZ>::Ptr &source,
 
 /********************THREE FUNCTIONS**********************/
 // generate triangle descriptor
-void GTINDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud, 
+void HashRegDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud, 
                                     FrameInfo &curr_frame_info)
 {
     curr_frame_info.currCenter.reset(new pcl::PointCloud<pcl::PointXYZINormal>);
@@ -671,7 +671,7 @@ void GTINDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &inp
 }
 
 // add triangle descriptor to data base   const std::vector<TriDesc> &trids_vec
-void GTINDescManager::AddTriDescs(const FrameInfo &curr_frame_info) {
+void HashRegDescManager::AddTriDescs(const FrameInfo &curr_frame_info) {
   // get the tri descriptor  
   std::vector<TriDesc> trids_vec;
   trids_vec = curr_frame_info.desc_;
@@ -701,7 +701,7 @@ void GTINDescManager::AddTriDescs(const FrameInfo &curr_frame_info) {
 }
 
 // search the loop for current fram, "stds_vec"
-void GTINDescManager::SearchPosition(
+void HashRegDescManager::SearchPosition(
     const FrameInfo &curr_frame, std::pair<int, double> &loop_result,
     std::pair<Eigen::Vector3d, Eigen::Matrix3d> &loop_transform,
     std::vector<std::pair<TriDesc, TriDesc>> &loop_std_pair) 
@@ -775,7 +775,7 @@ void GTINDescManager::SearchPosition(
 }
 
 // search the loop for current fram, "stds_vec"
-void GTINDescManager::SearchMultiPosition(
+void HashRegDescManager::SearchMultiPosition(
     const FrameInfo &curr_frame, std::vector<std::pair<int, double>> &loop_result,
     std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> &loop_transform,
     std::vector<std::vector<std::pair<TriDesc, TriDesc>>> &loop_std_pair_vec) 
@@ -867,7 +867,7 @@ void GTINDescManager::SearchMultiPosition(
 /********************USEFUL FUNCTIONS**********************/
 
 // init the cluster
-void GTINDescManager::init_clusterTLS(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud)
+void HashRegDescManager::init_clusterTLS(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ground(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_obj(new pcl::PointCloud<pcl::PointXYZ>);
@@ -944,7 +944,7 @@ void GTINDescManager::init_clusterTLS(const pcl::PointCloud<pcl::PointXYZ>::Ptr 
 }
 
 // init the cluster 
-void GTINDescManager::init_cluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud)
+void HashRegDescManager::init_cluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr &input_cloud)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_ground(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_obj(new pcl::PointCloud<pcl::PointXYZ>);
@@ -993,7 +993,7 @@ void GTINDescManager::init_cluster(const pcl::PointCloud<pcl::PointXYZ>::Ptr &in
 }
 
 // find the root point corresponding to the cluster
-void GTINDescManager::find_cluster_root(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
+void HashRegDescManager::find_cluster_root(pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud,
                                         std::vector<Cluster> &clusters)
 {
     int grid_num = config_setting_.grid_num;
@@ -1045,7 +1045,7 @@ void GTINDescManager::find_cluster_root(pcl::PointCloud<pcl::PointXYZ>::Ptr inpu
 }
 
 // get the center points and corresponding cluster points (Total)
-void GTINDescManager::getPoint(FrameInfo &curr_frame_info)
+void HashRegDescManager::getPoint(FrameInfo &curr_frame_info)
 {
     // get the total cluster center points, and points
     if(obj_clusters.size() == 0)
@@ -1094,7 +1094,7 @@ void GTINDescManager::getPoint(FrameInfo &curr_frame_info)
 }
 
 // construct the descriptors
-void GTINDescManager::build_stdesc(FrameInfo &curr_frame_info)
+void HashRegDescManager::build_stdesc(FrameInfo &curr_frame_info)
 {
     curr_frame_info.desc_.clear();
     double scale = 1.0 / config_setting_.side_resolution;
@@ -1252,7 +1252,7 @@ void GTINDescManager::build_stdesc(FrameInfo &curr_frame_info)
 }
 
 // select the candidate descriptors, according to the edge length
-void GTINDescManager::candidate_frames_selector(const FrameInfo &curr_frame,
+void HashRegDescManager::candidate_frames_selector(const FrameInfo &curr_frame,
                                                std::vector<TriMatchList> &candidate_matcher_vec) 
 {
     int descNum = curr_frame.desc_.size();
@@ -1418,7 +1418,7 @@ void GTINDescManager::candidate_frames_selector(const FrameInfo &curr_frame,
 }
 
 // Get the best candidate frame by geometry check
-void GTINDescManager::candidate_frames_verify( const FrameInfo &curr_frame,
+void HashRegDescManager::candidate_frames_verify( const FrameInfo &curr_frame,
     const TriMatchList &candidate_matcher, double &verify_score,
     std::pair<Eigen::Vector3d, Eigen::Matrix3d> &relative_pose,
     std::vector<std::pair<TriDesc, TriDesc>> &sucess_match_vec,
@@ -1545,7 +1545,7 @@ void GTINDescManager::candidate_frames_verify( const FrameInfo &curr_frame,
 }
 
 // solve the transform pose between two Triangle desciptors, by SVD
-void GTINDescManager::triangle_solver(std::pair<TriDesc, TriDesc> &std_pair,
+void HashRegDescManager::triangle_solver(std::pair<TriDesc, TriDesc> &std_pair,
                                     Eigen::Vector3d &t, Eigen::Matrix3d &rot) 
 {
     Eigen::Matrix3d src = Eigen::Matrix3d::Zero();
@@ -1573,7 +1573,7 @@ void GTINDescManager::triangle_solver(std::pair<TriDesc, TriDesc> &std_pair,
 }
 
 // geometric verify, the distance of point_to_plane, and the normal difference
-double GTINDescManager::geometric_verify(
+double HashRegDescManager::geometric_verify(
     const pcl::PointCloud<pcl::PointXYZINormal>::Ptr &source_cloud,
     const pcl::PointCloud<pcl::PointXYZINormal>::Ptr &target_cloud,
     std::pair<Eigen::Vector3d, Eigen::Matrix3d> &transform) 

@@ -94,7 +94,7 @@ int main(int argc, char **argv)
         // pcl::io::loadPLYFile(data_path+ "s" + std::to_string(i+1)+".ply", *las_data);
         pcl::io::loadPLYFile(data_path+ "S" + std::to_string(i+1)+".ply", *las_data);
 
-        std::cout << "target_data-" << to_string(i+1) << ": " << las_data->size() << std::endl;
+        std::cout << "reference_data-" << to_string(i+1) << ": " << las_data->size() << std::endl;
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr out_data(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::transformPointCloud(*las_data, *out_data, tlsTrans[i].matrix());

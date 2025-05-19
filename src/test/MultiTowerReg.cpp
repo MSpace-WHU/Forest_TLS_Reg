@@ -61,19 +61,19 @@ int main(int argc, char **argv)
     std::vector<TLSPos> tlsVec;
     for(int i=1; i<=std::stoi(argv[1]); i++)
     {
-        GTINDescManager *GTIN_map = new GTINDescManager(config_setting);
+        HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
         ICP_target->clear();
         std::cout << BOLDGREEN << "--------------------Reading Target Data-------------------" << to_string(i) << RESET << std::endl;
         readTLSData(data_path+"/data/tower/"+ to_string(i) +".las", ICP_target);
         std::cout << "Read Target (" + std::to_string(i) +"), Points NUM: " << ICP_target->size() << std::endl;
         
         std::cout << BOLDGREEN << "----------------Generate Descriptor----------------" << RESET << std::endl;
-        FrameInfo currMap;
-        GTIN_map->GenTriDescs(ICP_target, currMap);
-        GTIN_map->AddTriDescs(currMap);
+        FrameInfo reference_tls_info;
+        HashReg_RefTLS->GenTriDescs(ICP_target, reference_tls_info);
+        HashReg_RefTLS->AddTriDescs(reference_tls_info);
         std::cout << "FrameID: " << i
-            << " triangles NUM: " << currMap.desc_.size() 
-            << " feature points: "<< currMap.currCenter->points.size() << std::endl;  
+            << " triangles NUM: " << reference_tls_info.desc_.size() 
+            << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;  
         
         CandidateInfo currt_candidate;
         currt_candidate.currFrameID = i-1;
@@ -85,14 +85,14 @@ int main(int argc, char **argv)
                 std::cout << BOLDGREEN << "--------------------Reading Source Data-------------------" << to_string(j) << RESET << std::endl;
                 readTLSData(data_path+"/data/tower/"+ to_string(j) +".las", ICP_source);
                 FrameInfo searchMap;
-                GTIN_map->GenTriDescs(ICP_source, searchMap);
+                HashReg_RefTLS->GenTriDescs(ICP_source, searchMap);
                 
                 std::pair<int, double> search_result(-1, 0);
                 std::pair<Eigen::Vector3d, Eigen::Matrix3d> loop_transform;
                 loop_transform.first << 0, 0, 0;
                 loop_transform.second = Eigen::Matrix3d::Identity();
                 std::vector<std::pair<TriDesc, TriDesc>> loop_triangle_pair;
-                GTIN_map->SearchPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
+                HashReg_RefTLS->SearchPosition(searchMap, search_result, loop_transform, loop_triangle_pair);
                 
                 if(search_result.first != -1 && search_result.second > config_setting.icp_threshold)
                 {

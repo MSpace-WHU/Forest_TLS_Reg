@@ -139,7 +139,7 @@ pkg-config --modversion opencv
 
 #### Install CSF (Cloth Simulation Filter)
  
-CSF (Cloth Simulation Filter) is an algorithm for LiDAR ground filtering. It usually employed to the Airborne Lidar data, but also shown good performance on the Terrastrial-, Mobile-, and even Spaceborne- Lidar. In this program, CSF is ultilized to re-fine the ground points in the final phase.
+CSF (Cloth Simulation Filter) is an algorithm for LiDAR ground filtering. It usually employed to the Airborne Lidar data, but also shown good performance on the Terrastrial-, Mobile-, and even Spaceborne- Lidar.
 
 You can follow the instruction of [CSF](https://github.com/jianboqi/CSF).
 
@@ -165,7 +165,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release && make -j
 sudo make install
 ```
 
-In this program, small_gicp is employed to re-fined the key-frame pose calculated from SLAM algorithm.
+In this program, small_gicp is employed to re-fine registration.
 
 ### :gear: Build HashReg
 Clone this repository, then compile.

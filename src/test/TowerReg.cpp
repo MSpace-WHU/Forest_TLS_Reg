@@ -25,9 +25,9 @@
 #include "../include/utils/FEC.h"
 #endif
 
-#ifndef _TriObj_H_Included_
-#define _TriObj_H_Included_
-#include "../include/utils/TriObj.h"
+#ifndef _HashRegObj_H_Included_
+#define _HashRegObj_H_Included_
+#include "../include/utils/HashRegObj.h"
 #endif
 
 // C++

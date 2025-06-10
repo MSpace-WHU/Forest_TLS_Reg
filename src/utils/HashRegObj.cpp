@@ -4,7 +4,6 @@
 #endif
 #include <omp.h>
 
-
 // sort the node by vote number
 bool sortByVoteNumber(const std::pair<int, int> a, const std::pair<int, int> b)
 {

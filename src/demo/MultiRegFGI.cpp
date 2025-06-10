@@ -41,6 +41,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+// time
+#include <chrono>
 
 using namespace std;
 using namespace cv;
@@ -56,7 +58,10 @@ int main(int argc, char **argv)
         std::cout << "USAGE: ./MultiRegFGI [NUM of Stations]" << std::endl;
         return 1;
     }
-
+    
+    // start time
+    auto begin = std::chrono::steady_clock::now();
+    
     std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
@@ -70,6 +75,7 @@ int main(int argc, char **argv)
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> rough_error, fine_error;
     HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
     std::vector<FrameInfo> frameInfoVec;
+    std::vector<pcl::PointCloud<pcl::PointXYZ>> ds_points;
     double gen_dt = 0, add_dt = 0;
     int StationNUM = std::atoi(argv[1]);
     for(int i=1; i<=StationNUM; i++)
@@ -101,8 +107,13 @@ int main(int argc, char **argv)
         std::cout << "FrameID: " << reference_tls_info.frame_id_
                 << " triangles NUM: " << reference_tls_info.desc_.size() 
                 << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;  
+       
+        // down sample and then store the points data
+        down_sampling_voxel(*tls_point_data, 0.05);
+        ds_points.push_back(*tls_point_data);
+        // std::cout << "Downsampling (" + std::to_string(i) +"), Points NUM: " << tls_point_data->size() << std::endl;
     }
-    
+
     gen_dt = gen_dt/StationNUM;
     add_dt = add_dt/StationNUM;
     std::cout << "gt_pose size: " << gt_pose.size() << std::endl;
@@ -114,7 +125,7 @@ int main(int argc, char **argv)
     for(int i=0; i<HashReg_RefTLS->pointMat_vec_.size(); i++)
     {
         resizePixVal(HashReg_RefTLS->pointMat_vec_[i]); // resize the pixel value into [0-1]
-        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-ori_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
+        // cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-ori_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
 
         // save the filtered fig
         for(int j=0; j<HashReg_RefTLS->pointMat_vec_[i].rows; j++)
@@ -127,7 +138,7 @@ int main(int argc, char **argv)
                 }
             }
         }
-        cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-filterd_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
+        // cv::imwrite(data_path+"/data/fgi/" + std::to_string(i) + "-filterd_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
     }
 
     // stem position and its points cloud
@@ -158,8 +169,8 @@ int main(int argc, char **argv)
             }
         }
         std::cout << "stem_position NUM: " << stem_position->size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
-        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stems.pcd", *objs);
+        // pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
+        // pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stems.pcd", *objs);
     }
     
     // // discarded clusters
@@ -297,8 +308,11 @@ int main(int argc, char **argv)
         // get the currentID and target station
         pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_target(new pcl::PointCloud<pcl::PointXYZ>);
         int currID = candidates_vec[i].currFrameID;
-        readTLSData(data_path+"/data/fgi/"+ std::to_string(currID+1) +".las", ICP_target); 
         
+        // get the scan data, from las file or downsampled variables
+        // readTLSData(data_path+"/data/fgi/"+ std::to_string(currID+1) +".las", ICP_target); 
+        *ICP_target = ds_points[currID];
+
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> curr_transform, cand_transform;
         if(optiTLSVec[currID].isValued)
         {
@@ -318,7 +332,9 @@ int main(int argc, char **argv)
             int candID = candidates_vec[i].candidateIDScore[j].first;
             // read the candidate las data
             pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_source(new pcl::PointCloud<pcl::PointXYZ>);
-            readTLSData(data_path+"/data/fgi/"+ std::to_string(candID+1) +".las", ICP_source);
+            // get the scan data, from las file or downsampled variables
+            // readTLSData(data_path+"/data/fgi/"+ std::to_string(candID+1) +".las", ICP_source);
+            *ICP_source = ds_points[candID];
 
             if(optiTLSVec[candID].isValued)
             {
@@ -410,5 +426,14 @@ int main(int argc, char **argv)
     outfile.close();
 
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
+    
+    // end time
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> past = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+    std::cout << BOLDGREEN << "total cost time:" << past.count() << " sec\n" << RESET;
+    std::ofstream timeFile(data_path+"/data/fgi/run_time.txt");
+    timeFile << past.count();
+    timeFile.close();
+
     return 0;
 }

@@ -41,6 +41,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+// time
+#include <chrono>
 
 using namespace std;
 using namespace cv;
@@ -50,6 +52,9 @@ using namespace gtsam;
 
 int main(int argc, char **argv) 
 {
+    // start time
+    auto begin = std::chrono::steady_clock::now();
+    
     std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
     // read the setting parameters
@@ -377,7 +382,15 @@ int main(int argc, char **argv)
     outfile << "ICP Reg Num: " << regNum << std::endl;
     outfile << "Average gtsam_dt2: " << gtsam_dt2 << std::endl;
     outfile.close();
-
+    
+    // end time
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> past = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+    std::cout << BOLDGREEN << "total cost time:" << past.count() << " sec\n" << RESET;
+    
+    // ofstream timeFile(filepath.parent_path().string() + "/run_time.txt", ios::out);
+    // timeFile << past.count();
+    // timeFile.close();
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
     return 0;
 }

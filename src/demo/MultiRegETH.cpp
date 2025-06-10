@@ -42,6 +42,8 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+// time
+#include <chrono>
 
 using namespace std;
 using namespace cv;
@@ -57,6 +59,10 @@ int main(int argc, char **argv)
         std::cout << "USAGE: ./MultiRegETH [NUM of Stations]" << std::endl;
         return 1;
     }
+
+    // start time
+    auto begin = std::chrono::steady_clock::now();
+    
     // project data path
     std::string data_path = PROJECT_PATH;
     std::cout << BOLDGREEN << "----------------DATA PROCESSING----------------" << RESET << std::endl;
@@ -89,6 +95,7 @@ int main(int argc, char **argv)
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> rough_error, fine_error;
     HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
     std::vector<FrameInfo> frameInfoVec;
+    std::vector<pcl::PointCloud<pcl::PointXYZ>> ds_points;
     double gen_dt = 0, add_dt = 0;
     for(int i=1; i<=StationNUM; i++)
     {
@@ -113,6 +120,11 @@ int main(int argc, char **argv)
         std::cout << "FrameID: " << reference_tls_info.frame_id_
                 << " triangles NUM: " << reference_tls_info.desc_.size() 
                 << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;
+
+        // down sample and then store the points data
+        // down_sampling_voxel(*tls_point_data, 0.05);
+        ds_points.push_back(*tls_point_data);
+        // std::cout << "Downsampling (" + std::to_string(i) +"), Points NUM: " << tls_point_data->size() << std::endl;
     }
     gen_dt = gen_dt/StationNUM;
     add_dt = add_dt/StationNUM;
@@ -124,7 +136,7 @@ int main(int argc, char **argv)
     for(int i=0; i<HashReg_RefTLS->pointMat_vec_.size(); i++)
     {
         resizePixVal(HashReg_RefTLS->pointMat_vec_[i]); // resize the pixel value into [0-1]
-        cv::imwrite(data_path+"/data/eth/" + std::to_string(i) + "-ori_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
+        // cv::imwrite(data_path+"/data/eth/" + std::to_string(i) + "-ori_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
 
         // save the filtered fig
         for(int j=0; j<HashReg_RefTLS->pointMat_vec_[i].rows; j++)
@@ -137,7 +149,7 @@ int main(int argc, char **argv)
                 }
             }
         }
-        cv::imwrite(data_path+"/data/eth/" + std::to_string(i) + "-filterd_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
+        // cv::imwrite(data_path+"/data/eth/" + std::to_string(i) + "-filterd_fig.png", HashReg_RefTLS->pointMat_vec_[i]); 
     }
 
     // stem position and its points cloud
@@ -168,8 +180,8 @@ int main(int argc, char **argv)
             }
         }
         std::cout << "stem_position NUM: " << stem_position->size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
-        pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-stems.pcd", *objs);
+        // pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
+        // pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-stems.pcd", *objs);
     }
     
     // discarded clusters
@@ -194,7 +206,7 @@ int main(int argc, char **argv)
             }
         }
         std::cout << "current station discard_cluster NUM: " << HashReg_RefTLS->discarded_clusters_vec[i].size() << std::endl;
-        pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
+        // pcl::io::savePCDFile(data_path+"/data/eth/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
     }
     /************for display the stem and its position*************/
 
@@ -308,9 +320,13 @@ int main(int argc, char **argv)
         // get the currentID and target station
         pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_target(new pcl::PointCloud<pcl::PointXYZ>);
         int currID = candidates_vec[i].currFrameID;
-        pcl::io::loadPLYFile(data_path+"/data/eth/s"+std::to_string(currID+1)+".ply", *ICP_target);
-        std::cout << data_path+"/data/eth/s"+std::to_string(currID+1)+".ply : " << ICP_target->size() << std::endl;
-
+        
+        // // get the scan data, from PLY file or downsampled variables
+        // pcl::io::loadPLYFile(data_path+"/data/eth/s"+std::to_string(currID+1)+".ply", *ICP_target);
+        // std::cout << data_path+"/data/eth/s"+std::to_string(currID+1)+".ply : " << ICP_target->size() << std::endl;
+        
+        *ICP_target = ds_points[currID];
+        
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> curr_transform, cand_transform;
         // get the current transform
         if(optiTLSVec[currID].isValued)
@@ -330,10 +346,16 @@ int main(int argc, char **argv)
         {
             // get the candidate ID and the scan
             int candID = candidates_vec[i].candidateIDScore[j].first;
-            // read the candidate las data
+            
+            // // read the candidate las data
             pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_source(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::io::loadPLYFile(data_path+"/data/eth/s"+std::to_string(candID+1)+".ply", *ICP_source);
-            std::cout << data_path+"/data/eth/s"+std::to_string(candID+1)+".ply : " << ICP_source->size() << std::endl;
+            
+            // pcl::io::loadPLYFile(data_path+"/data/eth/s"+std::to_string(candID+1)+".ply", *ICP_source);
+            // std::cout << data_path+"/data/eth/s"+std::to_string(candID+1)+".ply : " << ICP_source->size() << std::endl;
+            
+            // get the scan data
+            *ICP_source = ds_points[candID];
+            
             if(optiTLSVec[candID].isValued)
             {
                 // init trans of source
@@ -429,5 +451,14 @@ int main(int argc, char **argv)
     outfile.close();
 
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
+    
+    // end time
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> past = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+    std::cout << BOLDGREEN << "total cost time:" << past.count() << " sec\n" << RESET;
+    std::ofstream timeFile(data_path+"/data/eth/run_time.txt");
+    timeFile << past.count();
+    timeFile.close();
+
     return 0;
 }

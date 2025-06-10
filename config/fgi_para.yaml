@@ -24,7 +24,7 @@ linearityThres: 0.95
 scateringThres: 0.05
 upThres: 0.3
 clusterHeight: 5
-centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
+centerSelection: 0  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
 
 # for tri descriptor
 descriptor_near_num: 10
@@ -36,7 +36,7 @@ side_resolution: 0.1
 candidate_num: 50
 rough_dis_threshold: 0.03
 vertex_diff_threshold: 0
-icp_threshold: 0.3
+icp_threshold: 0.5
 dist_candi_frames_verify: 1
 normal_geo_verify: 1
 dis_geo_verify: 0.3

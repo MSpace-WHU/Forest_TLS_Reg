@@ -646,7 +646,9 @@ void HashRegDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &
     curr_frame_info.currCenter.reset(new pcl::PointCloud<pcl::PointXYZINormal>);
     curr_frame_info.currCenterFix.reset(new pcl::PointCloud<pcl::PointXYZINormal>);
     curr_frame_info.currPoints.reset(new pcl::PointCloud<pcl::PointXYZ>);
-    init_cluster(input_cloud);
+    
+    // init_cluster(input_cloud);
+    init_clusterTLS(input_cloud);
 
     getPoint(curr_frame_info);
     // std::cout << "curr_frame_info.currCenter->points.size(): " 

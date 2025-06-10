@@ -65,15 +65,15 @@ void GTSAMOptimization(std::vector<TLSPos> tlsVec, std::vector<CandidateInfo> ca
             gtsam::Pose3 odometry(diffR, diffT);
             gtsam::noiseModel::Diagonal::shared_ptr odometryNoise = gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << v_rad, v_rad, v_rad, v_met, v_met, v_met).finished());
 
-            // gtSAMGraph.add(gtsam::BetweenFactor<gtsam::Pose3>(candID, currID, odometry, odometryNoise));
+            gtSAMGraph.add(gtsam::BetweenFactor<gtsam::Pose3>(candID, currID, odometry, odometryNoise));
 
-            // remove the cross error, such Plot-4 in Tongji-Tree Dataset
-            gtsam::Vector sigma(6);
-            sigma << sqrt(v_rad), sqrt(v_rad), sqrt(v_rad), sqrt(v_met), sqrt(v_met), sqrt(v_met);
-            auto noiseModel = gtsam::noiseModel::Robust::Create(
-                                gtsam::noiseModel::mEstimator::Huber::Create(1), // Huber
-                                gtsam::noiseModel::Diagonal::Sigmas(sigma));
-            gtSAMGraph.add(gtsam::BetweenFactor<gtsam::Pose3>(candID, currID, odometry, noiseModel));
+            // // remove the cross error, such Plot-4 in Tongji-Tree Dataset
+            // gtsam::Vector sigma(6);
+            // sigma << sqrt(v_rad), sqrt(v_rad), sqrt(v_rad), sqrt(v_met), sqrt(v_met), sqrt(v_met);
+            // auto noiseModel = gtsam::noiseModel::Robust::Create(
+            //                     gtsam::noiseModel::mEstimator::Huber::Create(1), // Huber
+            //                     gtsam::noiseModel::Diagonal::Sigmas(sigma));
+            // gtSAMGraph.add(gtsam::BetweenFactor<gtsam::Pose3>(candID, currID, odometry, noiseModel));
         }
     }
     gtSAMGraph.print();

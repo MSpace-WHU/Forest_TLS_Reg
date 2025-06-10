@@ -119,6 +119,7 @@ int main(int argc, char **argv)
     std::cout << "gt_pose size: " << gt_pose.size() << std::endl;
     std::cout << BOLDBLUE << "Average GenTriDescs_t: " << gen_dt << " Average AddTriDescs_t: " << add_dt << RESET << std::endl;
     
+    // TODO: Display
     /************for display, the range image, stem and its position*************/
     // range images
     std::cout << "range images NUM: " << HashReg_RefTLS->pointMat_vec_.size() << std::endl;
@@ -148,10 +149,20 @@ int main(int argc, char **argv)
         pcl::PointCloud<pcl::PointXYZINormal>::Ptr stem_position(new pcl::PointCloud<pcl::PointXYZINormal>);
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
         
+        // // get the final transformation
+        // Eigen::Matrix3d R = finalTLSVec[i].R;
+		// Eigen::Vector3d t = finalTLSVec[i].t;
+        
         for(int j=0; j<HashReg_RefTLS->clusters_vec_[i].size(); j++)
         {
             // get the stem position
-            pcl::PointXYZINormal p = HashReg_RefTLS->clusters_vec_[i][j].p_center_;    
+            pcl::PointXYZINormal p = HashReg_RefTLS->clusters_vec_[i][j].p_center_;
+            
+            // trans the points
+            // Eigen::Vector3d p_tmp(p.x, p.y, p.z);
+            // p_tmp = R * p_tmp + t;
+            // p.x = p_tmp[0]; p.y = p_tmp[1]; p.z = p_tmp[2];
+
             stem_position->push_back(p);
             
             // get the stem points with different colors
@@ -169,36 +180,37 @@ int main(int argc, char **argv)
             }
         }
         std::cout << "stem_position NUM: " << stem_position->size() << std::endl;
-        // pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
-        // pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stems.pcd", *objs);
+        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stem_position.pcd", *stem_position);
+        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-stems.pcd", *objs);
     }
     
-    // // discarded clusters
-    // std::cout << "discarded clusters NUM: " << HashReg_RefTLS->discarded_clusters_vec.size() << std::endl;
-    // for(int i=0; i<HashReg_RefTLS->discarded_clusters_vec.size(); i++)
-    // {
-    //     pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
-    //     for(int j=0; j<HashReg_RefTLS->discarded_clusters_vec[i].size(); j++)
-    //     {
-    //         // get the stem points with different colors
-    //         pcl::PointXYZRGB pk;
-    //         double r = rand()/256; double g = rand()/256; double b = rand()/256;
-    //         for(int k=0; k<HashReg_RefTLS->discarded_clusters_vec[i][j].points_.size(); k++)
-    //         {
-    //             pk.x = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].x;
-    //             pk.y = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].y;
-    //             pk.z = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].z;
+    // discarded clusters
+    std::cout << "discarded clusters NUM: " << HashReg_RefTLS->discarded_clusters_vec.size() << std::endl;
+    for(int i=0; i<HashReg_RefTLS->discarded_clusters_vec.size(); i++)
+    {
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr objs(new pcl::PointCloud<pcl::PointXYZRGB>);
+        for(int j=0; j<HashReg_RefTLS->discarded_clusters_vec[i].size(); j++)
+        {
+            // get the stem points with different colors
+            pcl::PointXYZRGB pk;
+            double r = rand()/256; double g = rand()/256; double b = rand()/256;
+            for(int k=0; k<HashReg_RefTLS->discarded_clusters_vec[i][j].points_.size(); k++)
+            {
+                pk.x = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].x;
+                pk.y = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].y;
+                pk.z = HashReg_RefTLS->discarded_clusters_vec[i][j].points_[k].z;
 
-    //             pk.r = r; pk.g = g; pk.b = b;
+                pk.r = r; pk.g = g; pk.b = b;
 
-    //             objs->push_back(pk);
-    //         }
-    //     }
-    //     std::cout << "current station discard_cluster NUM: " << HashReg_RefTLS->discarded_clusters_vec[i].size() << std::endl;
-    //     pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
-    // }
-    // /************for display the stem and its position*************/
+                objs->push_back(pk);
+            }
+        }
+        std::cout << "current station discard_cluster NUM: " << HashReg_RefTLS->discarded_clusters_vec[i].size() << std::endl;
+        pcl::io::savePCDFile(data_path+"/data/fgi/" + std::to_string(i) + "-discard_cluster.pcd", *objs);
+    }
+    /************for display the stem and its position*************/
 
+    // Searching
     std::vector<CandidateInfo> candidates_vec;
     std::vector<TLSPos> tlsVec;
     double search_dt = 0;

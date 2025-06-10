@@ -14,7 +14,7 @@ nSch_Stp: 10
 lGrp_Ele_Min: 15
 
 # for FEC cluster
-min_component_size: 200
+min_component_size: 500
 tolorance: 0.2
 max_n: 50
 merge_dist: 0.1
@@ -24,7 +24,7 @@ linearityThres: 0.95
 scateringThres: 0.05
 upThres: 0.3
 clusterHeight: 5
-centerSelection: 0  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
+centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
 
 # for tri descriptor
 descriptor_near_num: 10
@@ -36,7 +36,7 @@ side_resolution: 0.1
 candidate_num: 50
 rough_dis_threshold: 0.03
 vertex_diff_threshold: 0
-icp_threshold: 0.5
+icp_threshold: 0.4
 dist_candi_frames_verify: 1
 normal_geo_verify: 1
 dis_geo_verify: 0.3

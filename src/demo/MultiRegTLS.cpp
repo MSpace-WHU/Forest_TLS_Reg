@@ -70,6 +70,7 @@ int main(int argc, char **argv)
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> rough_error, fine_error;
     HashRegDescManager *HashReg_RefTLS = new HashRegDescManager(config_setting);
     std::vector<FrameInfo> frameInfoVec;
+    std::vector<pcl::PointCloud<pcl::PointXYZ>> ds_points;
     double gen_dt = 0, add_dt = 0;
     for(int i=1; i<=tlsTrans.size(); i++)
     {
@@ -94,7 +95,11 @@ int main(int argc, char **argv)
         
         std::cout << "FrameID: " << reference_tls_info.frame_id_
                 << " triangles NUM: " << reference_tls_info.desc_.size() 
-                << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;  
+                << " feature points: "<< reference_tls_info.currCenter->points.size() << std::endl;
+        
+        // down sample and then store the points data
+        down_sampling_voxel(*tls_point_data, 0.05);
+        ds_points.push_back(*tls_point_data);
     }
     gen_dt = gen_dt/tlsTrans.size();
     add_dt = add_dt/tlsTrans.size();
@@ -273,8 +278,13 @@ int main(int argc, char **argv)
         // get the currentID and target station
         pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_target(new pcl::PointCloud<pcl::PointXYZ>);
         int currID = candidates_vec[i].currFrameID;
-        readTLSData(data_path+"/data/snj/"+ std::to_string(currID+1) +".las", ICP_target); 
         
+        // // from las file
+        // readTLSData(data_path+"/data/snj/"+ std::to_string(currID+1) +".las", ICP_target); 
+        
+        // from downsampled data
+        *ICP_target = ds_points[currID];
+
         std::pair<Eigen::Vector3d, Eigen::Matrix3d> curr_transform, cand_transform;
         if(optiTLSVec[currID].isValued)
         {
@@ -294,7 +304,13 @@ int main(int argc, char **argv)
             int candID = candidates_vec[i].candidateIDScore[j].first;
             // read the candidate las data
             pcl::PointCloud<pcl::PointXYZ>::Ptr ICP_source(new pcl::PointCloud<pcl::PointXYZ>);
-            readTLSData(data_path+"/data/snj/"+ std::to_string(candID+1) +".las", ICP_source);
+
+            // // from las file
+            // readTLSData(data_path+"/data/snj/"+ std::to_string(candID+1) +".las", ICP_source);
+
+            // get the scan data
+            *ICP_source = ds_points[candID];
+            
 
             if(optiTLSVec[candID].isValued)
             {
@@ -385,12 +401,13 @@ int main(int argc, char **argv)
     
     // end time
     auto end = std::chrono::steady_clock::now();
+    // write the time
     std::chrono::duration<double> past = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
     std::cout << BOLDGREEN << "total cost time:" << past.count() << " sec\n" << RESET;
-    
-    // ofstream timeFile(filepath.parent_path().string() + "/run_time.txt", ios::out);
-    // timeFile << past.count();
-    // timeFile.close();
+    std::ofstream timeFile(data_path+"/data/snj/run_time.txt");
+    timeFile << past.count();
+    timeFile.close();
+
     std::cout << BOLDGREEN << "----------------Finish!----------------" << RESET << std::endl;
     return 0;
 }

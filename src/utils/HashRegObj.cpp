@@ -1106,6 +1106,8 @@ void HashRegDescManager::build_stdesc(FrameInfo &curr_frame_info)
     int near_num = config_setting_.descriptor_near_num;
     double max_dis_threshold = config_setting_.descriptor_max_len;
     double min_dis_threshold = config_setting_.descriptor_min_len;
+    // the difference between neighbor sides of triangle (m) --> (cm)
+    double len_dis_threshold = config_setting_.descriptor_len_diff * 100;
     std::unordered_map<UNI_VOXEL_LOC, bool> feat_map;
     pcl::KdTreeFLANN<pcl::PointXYZINormal>::Ptr kd_tree(
                             new pcl::KdTreeFLANN<pcl::PointXYZINormal>);
@@ -1141,6 +1143,20 @@ void HashRegDescManager::build_stdesc(FrameInfo &curr_frame_info)
                         b < min_dis_threshold || c < min_dis_threshold) {
                         continue;
                     }
+                    
+                    // check augnmentation, (m) to (mm), then (int) to (cm)
+                    pcl::PointXYZ d_p;
+                    d_p.x = a * 1000;
+                    d_p.y = b * 1000;
+                    d_p.z = c * 1000;
+
+                    // check whether is quilateral and isosceles triangles or not
+                    if((std::abs(d_p.x - d_p.y)/10) <= len_dis_threshold 
+                    || (std::abs(d_p.x - d_p.z)/10) <= len_dis_threshold
+                    || (std::abs(d_p.y - d_p.z)/10) <= len_dis_threshold) {
+                        continue;
+                    }
+
                     // re-range the vertex by the side length, in other words, sort the side length
                     double temp;
                     Eigen::Vector3d A, B, C;
@@ -1176,11 +1192,7 @@ void HashRegDescManager::build_stdesc(FrameInfo &curr_frame_info)
                         l1 = l2;
                         l2 = l_temp;
                     }
-                    // check augnmentation, (m) to (cm)
-                    pcl::PointXYZ d_p;
-                    d_p.x = a * 1000;
-                    d_p.y = b * 1000;
-                    d_p.z = c * 1000;
+
                     UNI_VOXEL_LOC position((int64_t)d_p.x, (int64_t)d_p.y, (int64_t)d_p.z);
                     auto iter = feat_map.find(position);
                     Eigen::Vector3d normal_1, normal_2, normal_3;

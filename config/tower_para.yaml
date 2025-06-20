@@ -30,6 +30,7 @@ centerSelection: 2  # 0 for minmum z of cluster; 1 for root points; 2 for fix he
 descriptor_near_num: 10
 descriptor_min_len: 2
 descriptor_max_len: 50
+descriptor_len_diff: 0.1
 side_resolution: 0.1
 
 # for the registration

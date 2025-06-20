@@ -44,6 +44,7 @@ typedef struct ConfigSetting {
 	int descriptor_near_num = 10;
 	double descriptor_min_len = 2;
 	double descriptor_max_len = 50;
+  double descriptor_len_diff = 0.1;
 	double side_resolution = 0.1;
 	
 	// for place recognition

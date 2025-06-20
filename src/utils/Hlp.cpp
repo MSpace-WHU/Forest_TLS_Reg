@@ -306,11 +306,13 @@ void ReadParas(const std::string& file_path, ConfigSetting &config_setting)
 	config_setting.descriptor_near_num = (int)fs["descriptor_near_num"];
 	config_setting.descriptor_min_len = (double)fs["descriptor_min_len"];
 	config_setting.descriptor_max_len = (double)fs["descriptor_max_len"];
+	config_setting.descriptor_len_diff = (double)fs["descriptor_len_diff"];
 	config_setting.side_resolution = (double)fs["side_resolution"];
 	std::cout << BOLDBLUE << "-----------Read Parameters to triangle descriptor-----------" << RESET << std::endl;
 	std::cout << "descriptor_near_num: " << config_setting.descriptor_near_num << std::endl;
 	std::cout << "descriptor_min_len: " << config_setting.descriptor_min_len << std::endl;
 	std::cout << "descriptor_max_len: " << config_setting.descriptor_max_len << std::endl;
+	std::cout << "descriptor_len_diff: " << config_setting.descriptor_len_diff << std::endl;
 	std::cout << "side_resolution: " << config_setting.side_resolution << std::endl;
 
 	// read the parameters for registration

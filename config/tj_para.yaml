@@ -30,13 +30,14 @@ centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix he
 descriptor_near_num: 10
 descriptor_min_len: 2
 descriptor_max_len: 50
+descriptor_len_diff: 0.1
 side_resolution: 0.1
 
 # for the registration
 candidate_num: 50
 rough_dis_threshold: 0.03
 vertex_diff_threshold: 0
-icp_threshold: 0.5
+icp_threshold: 0.4
 dist_candi_frames_verify: 1
 normal_geo_verify: 1
 dis_geo_verify: 0.3

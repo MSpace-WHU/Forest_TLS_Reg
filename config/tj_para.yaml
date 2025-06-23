@@ -10,8 +10,8 @@ grid_num: 100
 # segment by continuity
 isRow_Or_Column: 1 # 0,1,2
 dDif_Th: 0.05
-nSch_Stp: 10
-lGrp_Ele_Min: 15
+nSch_Stp: 15
+lGrp_Ele_Min: 100   # 30 for plot1 and 4
 
 # for FEC cluster
 min_component_size: 200
@@ -23,7 +23,7 @@ merge_dist: 0.1
 linearityThres: 0.95
 scateringThres: 0.05
 upThres: 0.3
-clusterHeight: 0
+clusterHeight: 1.5
 centerSelection: 1  # 0 for minmum z of cluster; 1 for root points; 2 for fix height
 
 # for tri descriptor
@@ -37,7 +37,7 @@ side_resolution: 0.1
 candidate_num: 50
 rough_dis_threshold: 0.03
 vertex_diff_threshold: 0
-icp_threshold: 0.4
+icp_threshold: 0.5      # use 0.5 for plots1-3, 0.4 in plot4, 
 dist_candi_frames_verify: 1
 normal_geo_verify: 1
 dis_geo_verify: 0.3

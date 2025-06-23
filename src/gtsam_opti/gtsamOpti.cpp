@@ -63,8 +63,8 @@ void GTSAMOptimization(std::vector<TLSPos> tlsVec, std::vector<CandidateInfo> ca
             gtsam::Rot3 diffR(candidates_vec[i].relativePose[j].second);
 
             gtsam::Pose3 odometry(diffR, diffT);
-            gtsam::noiseModel::Diagonal::shared_ptr odometryNoise = gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << v_rad, v_rad, v_rad, v_met, v_met, v_met).finished());
 
+            gtsam::noiseModel::Diagonal::shared_ptr odometryNoise = gtsam::noiseModel::Diagonal::Variances((gtsam::Vector(6) << v_rad, v_rad, v_rad, v_met, v_met, v_met).finished());
             gtSAMGraph.add(gtsam::BetweenFactor<gtsam::Pose3>(candID, currID, odometry, odometryNoise));
 
             // // remove the cross error, such Plot-4 in Tongji-Tree Dataset

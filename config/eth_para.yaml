@@ -10,8 +10,8 @@ grid_num: 100
 # segment by continuity
 isRow_Or_Column: 1 # 0,1,2
 dDif_Th: 0.05
-nSch_Stp: 10
-lGrp_Ele_Min: 15
+nSch_Stp: 15
+lGrp_Ele_Min: 100
 
 # for FEC cluster
 min_component_size: 200

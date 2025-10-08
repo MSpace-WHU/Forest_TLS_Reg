@@ -650,7 +650,7 @@ void HashRegDescManager::GenTriDescs(const pcl::PointCloud<pcl::PointXYZ>::Ptr &
     // init the clusters only by seg image
     init_cluster(input_cloud);
     
-    // perform CSF filter before seg clusters
+    // // perform CSF filter before seg clusters
     // init_clusterTLS(input_cloud);
 
     getPoint(curr_frame_info);

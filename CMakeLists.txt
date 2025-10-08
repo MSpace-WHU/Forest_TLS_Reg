@@ -131,6 +131,19 @@ target_link_libraries(MultiRegTLSPoints
   gtsam
 )
 
+# Reg Genhe tree dataset
+add_executable(MultiRegGenhe ./src/demo/MultiRegTLS_GenHe.cpp ${utils_sources} ${gtsam_opti_sources})
+target_compile_options(MultiRegGenhe PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(MultiRegGenhe
+  ${PCL_LIBRARIES} 
+  ${OpenCV_LIBRARIES}
+  ${OpenMP_CXX_FLAGS}
+  ${libLAS_LIBRARIES}
+  libsmall_gicp.so
+  libCSF.a
+  gtsam
+)
+
 # Reg Tongji tree dataset
 add_executable(MultiRegTongji ./src/demo/MultiRegTongji.cpp ${utils_sources} ${gtsam_opti_sources})
 target_compile_options(MultiRegTongji PRIVATE ${OpenMP_CXX_FLAGS})

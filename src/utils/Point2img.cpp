@@ -90,3 +90,35 @@ void horiGrid(pcl::PointCloud<pcl::PointXYZ>::Ptr ori_pc,
     }
 
 }
+
+
+// resize the pix value to 0-1
+void resizePixVal(cv::Mat& matData)
+{
+    double minValue, maxValue;    // 最大值，最小值
+    cv::Point  minIdx, maxIdx;    // 最小值坐标，最大值坐标     
+    cv::minMaxLoc(matData, &minValue, &maxValue, &minIdx, &maxIdx);
+    std::cout << "minValue: " << minValue 
+            << ", maxValue: " << maxValue << std::endl;
+    if(maxValue == 1)
+    {
+        for(int i=0; i<matData.rows; i++){
+            for(int j=0; j<matData.cols; j++){
+                matData.at<float>(i, j) = matData.at<float>(i, j)*255;
+            }
+        }
+    }
+    else
+    {
+        for(int i=0; i<matData.rows; i++){
+            for(int j=0; j<matData.cols; j++){
+                if(matData.at<float>(i, j) != 0 && matData.at<float>(i, j) != INSIGNIFICANCE)
+                {
+                    // 1 - matData.at<float>(i, j)/maxValue
+                    matData.at<float>(i, j) = 1 - matData.at<float>(i, j)/maxValue;
+                    matData.at<float>(i, j) = matData.at<float>(i, j)*255;
+                }
+            }
+        }        
+    }      
+}

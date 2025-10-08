@@ -29,3 +29,5 @@ void img2point(std::vector<std::vector<POINT_D>> &grid_data,
 void horiGrid(pcl::PointCloud<pcl::PointXYZ>::Ptr ori_pc,
                int grid_num, double range, 
                std::vector<std::vector<POINT_D>> &grid_data);
+
+void resizePixVal(cv::Mat& matData);

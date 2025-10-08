@@ -41,6 +41,7 @@ link_directories(
 	include
 	${PCL_LIBRARY_DIRS}
   ${OpenCV_LIBRARY_DIRS}
+  thirdParty
 )
 
 # set the global path variable
@@ -104,6 +105,7 @@ target_link_libraries(Reg2TLSPoints
   ${libLAS_LIBRARIES}
   libCSF.a
   libsmall_gicp.so
+  libSeg.so
 )
 
 # Reg TLS Chain
@@ -116,6 +118,7 @@ target_link_libraries(ChainRegTLSPoints
   ${libLAS_LIBRARIES}
   libsmall_gicp.so
   libCSF.a
+  libSeg.so
 )
 
 # Multi Reg TLS
@@ -129,6 +132,7 @@ target_link_libraries(MultiRegTLSPoints
   libsmall_gicp.so
   libCSF.a
   gtsam
+  libSeg.so
 )
 
 # Reg Genhe tree dataset
@@ -142,6 +146,7 @@ target_link_libraries(MultiRegGenhe
   libsmall_gicp.so
   libCSF.a
   gtsam
+  libSeg.so
 )
 
 # Reg Tongji tree dataset
@@ -155,6 +160,7 @@ target_link_libraries(MultiRegTongji
   libsmall_gicp.so
   libCSF.a
   gtsam
+  libSeg.so
 )
 
 # Multi Reg FGI
@@ -168,6 +174,7 @@ target_link_libraries(MultiRegFGI
   libsmall_gicp.so
   libCSF.a
   gtsam
+  libSeg.so
 )
 
 # Reg the ETH
@@ -181,6 +188,7 @@ target_link_libraries(MultiRegETH
   libsmall_gicp.so
   libCSF.a
   gtsam
+  libSeg.so
 )
 ##########################################################
 ########################Demo Node#########################
@@ -201,6 +209,7 @@ target_link_libraries(TowerReg
   ${libLAS_LIBRARIES}
   libsmall_gicp.so
   libCSF.a
+  libSeg.so
 )
 
 # Reg Multi tower stations
@@ -213,6 +222,7 @@ target_link_libraries(MultiTowerReg
   ${libLAS_LIBRARIES}
   libsmall_gicp.so
   libCSF.a
+  libSeg.so
 )
 
 # Chain Reg tower stations
@@ -225,6 +235,7 @@ target_link_libraries(ChainTowerReg
   ${libLAS_LIBRARIES}
   libsmall_gicp.so
   libCSF.a
+  libSeg.so
 )
 
 # test the dfs algorithm

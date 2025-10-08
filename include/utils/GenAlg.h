@@ -22,5 +22,3 @@ void segPoints(cv::Mat &pointMat,
                 int Horizon_SCAN, int N_SCAN,
                 cv::Mat &pointTypeMat,
                 ConfigSetting config_setting);
-
-void resizePixVal(cv::Mat& matData);
